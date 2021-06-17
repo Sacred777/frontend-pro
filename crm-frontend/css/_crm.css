@@ -10,6 +10,7 @@
   padding: 2px;
   background: transparent;
   cursor: pointer;
+  color: inherit;
 }
 
 .btn:focus-visible {
@@ -151,6 +152,8 @@
 }
 
 .table-head__icon {
+  display: inline-block;
+  /* margin-bottom: 1px; */
   width: 12px;
   height: 12px;
   fill: var(--light-slate-blue);
@@ -163,7 +166,7 @@ transform: rotate(180deg);
 
 .table-head_createdate svg, 
 .table-head_updatedate svg {
-  margin-left: -4px;
+  /* margin-left: -4px; */
 }
 
 
