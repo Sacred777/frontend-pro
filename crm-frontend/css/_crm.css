@@ -184,6 +184,8 @@ transform: rotate(180deg);
 
 .table-body {
   position: relative; /*TODO имеет смысл когда вешием оверлей на загрузку*/
+  min-height: 300px;
+  background-color: var(--white);
 }
 
 .table-body__overlay { /* Оверлей для загрузки данных в таблицу */
