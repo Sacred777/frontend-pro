@@ -25,8 +25,8 @@
     header.append(form);
   
     return {
-      header: header,
-      form: form,
+      header,
+      form,
       input: formInput,
     };
   };
@@ -55,11 +55,6 @@
     const headThContacts = document.createElement('th');
     const headThActions = document.createElement('th');
     
-    const iconUP = `<svg class="table-head__icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" /></svg>`;
-    const iconDown = `<svg class="table-head__icon rotate_180" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" /></svg>`;
-  
     main.classList.add('main__container', 'container');
     title.classList.add('main__title');
     tableBox.classList.add('table__box');
@@ -67,30 +62,30 @@
     headTr.classList.add('table-head__row');
     headThId.classList.add('table-head__cells', 'table-head_id');
     headThIdTitle.classList.add('head-id__title');
+    headThIdImg.classList.add('table-head__icon');
     headThFullname.classList.add('table-head__cells', 'table-head_fullname');
     headThFullnameTitle.classList.add('head-fullname__title');
+    headThFullnameImg.classList.add('table-head__icon', 'rotate_180');
     headThFullnameDescr.classList.add('head-fullname__descr');
     headThCreatedate.classList.add('table-head__cells', 'table-head_createdate');
     headThCreatedateTitle.classList.add('head-createdate__title');
+    headThCreatedateImg.classList.add('table-head__icon', 'rotate_180');
     headThUpdatedate.classList.add('table-head__cells', 'table-head_updatedate');
     headThUpdatedateTitle.classList.add('head-updatedate__title');
+    headThUpdatedateImg.classList.add('table-head__icon', 'rotate_180');
     headThContacts.classList.add('table-head__cells');
     headThActions.classList.add('table-head__cells', 'table-head_actions');
   
     title.innerText = 'Клиенты';
     headThId.setAttribute('id', 'id');
     headThIdTitle.innerText = 'ID';
-    headThIdImg.innerHTML = iconUP;
     headThFullname.setAttribute('id', 'fullname');
     headThFullnameTitle.innerText = 'Фамилия Имя Отчество';
-    headThFullnameImg.innerHTML = iconDown;
     headThFullnameDescr.innerText = 'А-Я';
     headThCreatedate.setAttribute('id', 'createdate');
     headThCreatedateTitle.innerText = 'Дата и время создания';
-    headThCreatedateImg.innerHTML = iconDown;
     headThUpdatedate.setAttribute('id', 'updatedate');
     headThUpdatedateTitle.innerText = 'Последние изменения';
-    headThUpdatedateImg.innerHTML = iconDown;
     headThContacts.setAttribute('id', 'contacts');
     headThContacts.innerText = 'Контакты';
     headThActions.setAttribute('id', 'actions');
@@ -122,12 +117,11 @@
     main.append(tableBox);
   
     return {
-      main: main,
-      tableBox: tableBox,
+      main,
+      tableBox,
       tr: headTr,
     };
   };
-  
 
   // Создаем контейнер тела таблицы и оверлей
   function createTableBody() {
@@ -140,7 +134,7 @@
     tableBody.classList.add('table-body');
     overlay.classList.add('table-body__overlay','blocked');
     overlayRing.classList.add('table-body__ring');
-    table.classList.add('table');
+    table.classList.add('table', 'data-table');
   
     overlay.append(overlayRing);
     table.append(tbody);
@@ -148,35 +142,36 @@
     tableBody.append(table);
   
     return {
-      tableBody: tableBody,
-      overlay: overlay,
+      tableBody,
+      overlay,
     }
   }
   
+  // Создаем кнопку добавления клинета
   function createAddClientBtn() {
     const btnWraper = document.createElement('div');
     const btn = document.createElement('button');
     const text = document.createElement('span');
-    const icon = `<svg class= "add-client__icon" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M14.5 8C16.71 8 18.5 6.21 18.5 4C18.5 1.79 16.71 0 14.5 0C12.29 0 10.5 1.79 10.5 4C10.5 6.21 12.29 8 14.5 8ZM5.5 6V3H3.5V6H0.5V8H3.5V11H5.5V8H8.5V6H5.5ZM14.5 10C11.83 10 6.5 11.34 6.5 14V16H22.5V14C22.5 11.34 17.17 10 14.5 10Z"/>
-    </svg>`
+    const icon = document.createElement('span');
   
     btnWraper.classList.add('add-client');
     btn.classList.add('add-client__btn', 'btn');
-    btn.innerHTML = icon;
+    icon.classList.add('add-client__icon');
     text.innerText = 'Добавить клиента';
   
+    btn.append(icon);
     btn.append(text);
     btnWraper.append(btn);
 
     return {
       wraper: btnWraper, 
-      btn: btn, 
+      btn, 
     };
   };
 
+  // Вставляем данные в таблицу
   function insertClientsData(clientsArray) {
-    const tbody = document.querySelector('tbody');
+    const tbody = deleteTableRows();
     clientsArray.forEach( (e) => {
       const tr = document.createElement('tr');
       const tdId = document.createElement('td');
@@ -190,10 +185,7 @@
       const updateDate = document.createElement('span');
       const updateTime = document.createElement('span');
       const tdContacts = document.createElement('td');
-      const ulContacts = document.createElement('ul');
-      
-    // TODO нужна функция формирования списка контактов
-
+      const ulContacts = createContactList(e.contacts);
       const tdActions = document.createElement('td');
       const wrapActions = document.createElement('div');
       const btnEdit = document.createElement('button');
@@ -202,20 +194,6 @@
       const btnDelete = document.createElement('button');
       const btnDeleteImg = document.createElement('span');
       const btnDeleteText = document.createElement('span');
-
-      const iconEdit = `<svg class="actions-btn__icon edit-btn__icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g opacity="0.7">
-      <path d="M2 11.5002V14.0002H4.5L11.8733 6.62687L9.37333 4.12687L2 11.5002ZM13.8067 4.69354C14.0667 4.43354 14.0667 4.01354 13.8067 3.75354L12.2467 2.19354C11.9867 1.93354 11.5667 1.93354 11.3067 2.19354L10.0867 3.41354L12.5867 5.91354L13.8067 4.69354Z"/>
-      </g>
-      </svg>`;
-      const iconOverlay = `<svg class="load__icon edit-load__icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3.00008 8.04008C3.00008 10.8236 5.2566 13.0801 8.04008 13.0801C10.8236 13.0801 13.0801 10.8236 13.0801 8.04008C13.0801 5.2566 10.8236 3.00008 8.04008 3.00008C7.38922 3.00008 6.7672 3.12342 6.196 3.34812" stroke="#9873FF" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round"/>
-      </svg>`;
-      const iconDelete = `<svg class="actions-btn__icon delete-btn__icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g opacity="0.7">
-      <path d="M8 2C4.682 2 2 4.682 2 8C2 11.318 4.682 14 8 14C11.318 14 14 11.318 14 8C14 4.682 11.318 2 8 2ZM8 12.8C5.354 12.8 3.2 10.646 3.2 8C3.2 5.354 5.354 3.2 8 3.2C10.646 3.2 12.8 5.354 12.8 8C12.8 10.646 10.646 12.8 8 12.8ZM10.154 5L8 7.154L5.846 5L5 5.846L7.154 8L5 10.154L5.846 11L8 8.846L10.154 11L11 10.154L8.846 8L11 5.846L10.154 5Z"/>
-      </g>
-      </svg>`
 
       tr.classList.add('table__row');
       tdId.classList.add('row__cells', 'body-cells_id');
@@ -229,13 +207,17 @@
       updateDate.classList.add('cell-update__date');
       updateTime.classList.add('cell-update__time');
       tdContacts.classList.add('row__cells');
-      ulContacts.classList.add('contacts__list');
       tdActions.classList.add('row__cells');
       wrapActions.classList.add('actions__wraper');
       btnEdit.classList.add('edit-btn', 'btn');
+      btnEditImg.classList.add('actions-btn__icon', 'edit-btn__icon');
       btnEditText.classList.add('edit-btn__text');
       btnDelete.classList.add('delete-btn', 'btn');
+      btnDeleteImg.classList.add('actions-btn__icon', 'delete-btn__icon');
       btnDeleteText.classList.add('delete-btn__text');
+
+      btnEdit.setAttribute('data-id', e.id);
+      btnDelete.setAttribute('data-id', e.id);
 
       tdId.innerText = e.id.slice(-6);
       tdFullname.innerText = getFullname(e.lastName, e.name, e.surname);
@@ -243,9 +225,7 @@
       createTime.innerText = formatTime(e.createdAt);
       updateDate.innerText = formatDate(e.updatedAt);
       updateTime.innerText = formatTime(e.updatedAt);
-      btnEditImg.innerHTML = iconEdit;
       btnEditText.innerText = 'Изменить';
-      btnDeleteImg.innerHTML = iconDelete;
       btnDeleteText.innerText = 'Удалить';
 
       wrapCreateDate.append(createDate);
@@ -255,11 +235,7 @@
       wrapUpdateDate.append(updateDate);
       wrapUpdateDate.append(updateTime);
       tdUpdateDate.append(wrapUpdateDate);
-
-      // TODO append li из функции в ul 
-
       tdContacts.append(ulContacts);
-
       btnEdit.append(btnEditImg);
       btnEdit.append(btnEditText);
       btnDelete.append(btnDeleteImg);
@@ -277,6 +253,8 @@
 
       tbody.append(tr);
     });
+
+    return tbody;
   };
   
   // Получаем полное имя в одну строку
@@ -304,26 +282,134 @@
     return str.slice(11, 16);
   }
 
+  // Создаем список контактов клиента
+  function createContactList(contactsArray) {
+    const ul = document.createElement('ul');
+    ul.classList.add('contacts__list');
+    const arreyLength = contactsArray.length;
+    let visible = true;
+    let i = 1;
+
+    contactsArray.forEach(e => {
+      if (i === 5 & arreyLength > 5) {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        li.classList.add('contacts__item');
+        span.classList.add('contacts__icon_ring');
+        span.innerText = '+' + (arreyLength - i); //TODO Нарисовать окружность и внутри цифру
+        li.append(span);
+        ul.append(li);
+        visible = false;
+      }
+
+      ul.append(createContactElement(e, visible));
+      ++i;
+    });
+    
+    return ul;
+  };
+
+  // Функция создает li элемент для списка контактов
+  function createContactElement(contact, visible) {
+    const li = document.createElement('li');
+    const img = document.createElement('img');
+
+    li.classList.add('contacts__item');
+    if (!visible) {
+      li.classList.add('blocked');
+    };
+    img.classList.add('contacts__icon');
+
+    li.setAttribute('data-type', contact.type);
+    li.setAttribute('data-value', contact.value);
+
+
+    switch(contact.type) {
+      case 'Телефон':
+        img.setAttribute('src', './img/phone.svg');
+        img.setAttribute('alt', 'Телефон'); 
+        break;
+      case 'Facebook':
+        img.setAttribute('src', './img/fb.svg');
+        img.setAttribute('alt', 'Фэйсбук');  
+        break;
+      case 'VK': 
+        img.setAttribute('src', './img/vk.svg');
+        img.setAttribute('alt', 'В контактах'); 
+        break;
+      case 'Email': 
+        img.setAttribute('src', './img/mail.svg');
+        img.setAttribute('alt', 'Имэйл'); 
+        break;
+      default: 
+        img.setAttribute('src', './img/other.svg');
+        img.setAttribute('alt', 'Другое'); 
+    };
+    
+    li.append(img);
+
+    return li;
+  };
+
+  // Сорировка списка клиентов по полю ID
+  function sortClientsById(ClientsArray, ascending) {
+    if (ascending) {
+     return ClientsArray.sort((a, b) => a.id > b.id ? 1 : -1);
+    }
+    return ClientsArray.sort((a, b) => a.id < b.id ? 1 : -1);
+  }
+
+  // Сорировка списка клиентов по полю Ф.И.О.
+  function sortClientsByFullname(ClientsArray, ascending) {
+    if (ascending) {
+      return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() > b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+     }
+     return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() < b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+  }
+
+  // Сорировка списка клиентов по полю Дата и время создания
+  function sortClientsByDate(ClientsArray, fied, ascending) {
+    if (ascending) {
+      return ClientsArray.sort((a, b) => new Date(a[fied]).getTime() > new Date(b[fild]).getTime() ? 1 : -1);
+    }
+     return ClientsArray.sort((a, b) => new Date(a[fied]).getTime() > new Date(b[fild]).getTime() ? 1 : -1);
+  }
+
+  // Удаление tbody таблицы чтобы её данные для отображения
+  function deleteTableRows() {
+    const tbody = document.querySelector('tbody');
+    while(tbody.rows.length > 0) {
+      tbody.deleteRow(0);
+    }
+    return tbody;
+  };
+
+  // ============================
   // Серверная часть
   const URI = 'http://localhost:3000/api/clients';
 
+  // TODO Это убрать. Только для тестов
+  const delay = ms => {
+    return new Promise(r => setTimeout(() => r(), ms));
+  };
+
   // Читаем клиентов из базы
   async function fetchGetClients() {
+    // await delay(5000); // TODO Для установления задержки
     const response = await fetch(URI);
     const data = await response.json();
-    // console.log(data);
-    // return await pesponse.json();
-    // return data;
-    insertClientsData(data);
+    return data;
   };
   
   // Ищем клиентов
   async function fetchSearchClients(search) {
+    // await delay(5000); // TODO Для установления задержки
     const url = `${URI}?search=${search}`;
-    // console.log(url);
+    // console.log(search, url);
     const pesponse = await fetch(url);
     const data = await pesponse.json();
     // console.log(data);
+    return data;
   };
   // fetchSearchClients('Льев');
 
@@ -374,7 +460,8 @@
   async function fetchGetClientById(id) {
     const pesponse = await fetch(`${URI}/${id}`);
     const data = await pesponse.json();
-    console.log(data);
+    // console.log(data);
+    return data;
   };
   // fetchGetClientById('1619590335813');
 
@@ -394,6 +481,7 @@
     });
     const data = await response.json();
     console.log(data);
+    return data;
   };
   // fetchUpdateClient('1619595050787');
 
@@ -411,25 +499,63 @@
 
   // Основная функция
   document.addEventListener('DOMContentLoaded', () => {
-    function createApp() {
+    async function createApp() {
       const container = document.getElementById('crm-app');
-      const header = createHeader();
+      const header = createHeader(); //Создаем шапку
       const tableHead = createTableHead();
       const tableBody = createTableBody();
-      const addBtn = createAddClientBtn();
-      // const main = tableHead.main;
-      // const tableBox = tableHead.tableBox;
+      const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах
+      const ascending = true; // TODO этого не нужно будет Признак сортировки по возрастанию
+
+      const clientsState = {
+        field: 'id',
+        ascending: true,
+        clients: [],
+      };
 
       container.append(header.header);
       container.append(tableHead.main);
       tableHead.tableBox.append(tableBody.tableBody);
       tableHead.main.append(addBtn.wraper);
 
-      tableBody.overlay.classList.remove('blocked');
-      const getClients = fetchGetClients();
-      // insertClientsData(getClients);
-      tableBody.overlay.classList.add('blocked');      
+      //в fetchGetClients() реализована задержка, чтобы посмотреть как работает оверлей
+      // header.input.setAttribute('disabled', 'disabled'); //дактивировал input поиска до загрузки данных он не нужен
+      header.input.disabled = true;
+      tableBody.overlay.classList.remove('blocked'); //Показываю оверлей
+      const getClients = await fetchGetClients(); //TODO этого не нужно будет Получил массив объектов из базы в переменную
+      clientsState.clients = await fetchGetClients(); // Это хорошо, записываем прямо в объект
+      console.log(clientsState);
+      const clientsArray = getClients.slice(); //Сделал копию массива, буду работать с ней
+      const insertClientsDataElement = insertClientsData(sortClientsById(clientsArray, ascending)); // вставил в таблицу отсортированные по ID данные
+      // TODO нужно подкрасить в заголовке поле по которому происходит сортировка
 
+      // console.log(insertClientsDataElement);
+
+      tableBody.overlay.classList.add('blocked'); //скрываю оверлей
+      // header.input.removeAttribute('disabled'); //разблокирую input поиска 
+      header.input.disabled = false; //Снял блокировку с input 
+      
+      //вешаю событие на input c задержкой времени
+      const DELAY_TIME = 300; //300 мс установлено тех. заданием
+      let timeoutId = null;
+      header.input.addEventListener('input', () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {findContacts()}, DELAY_TIME); //попробуй передать аргумент head и insertClientsDataElement
+      });
+
+      async function findContacts() { //сюда бы передать header
+        const inputValue = header.input.value.trim();
+        if (inputValue) {
+          const foundClients = await fetchSearchClients(inputValue);
+          if (foundClients.length) {
+            insertClientsData(sortClientsById(foundClients, ascending)) // TODO скорее сортировка по ID по увеличению или брать текущую сотрировку
+          } else {
+            deleteTableRows();
+          };
+        } else {
+          insertClientsData(sortClientsById(clientsArray, ascending));
+        };
+      };
     };
     
     createApp();

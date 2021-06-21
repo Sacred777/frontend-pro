@@ -153,11 +153,12 @@
 
 .table-head__icon {
   display: inline-block;
-  /* margin-bottom: 1px; */
+  margin-bottom: -2px;
   width: 12px;
   height: 12px;
-  fill: var(--light-slate-blue);
-  vertical-align: middle;
+  background-image: url(../img/arrow_sort.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .rotate_180 {
@@ -261,7 +262,8 @@ transform: rotate(180deg);
 .contacts__list {
   display: flex;
   flex-wrap: wrap;
-  align-content: space-between;
+  align-items: center;
+  /* align-content: space-between; */
   height: 100%;
   padding: 9px 21px 5px 0;
 }
@@ -282,6 +284,22 @@ transform: rotate(180deg);
 
 .contacts__icon:hover {
   opacity: 1;
+}
+
+.contacts__icon_ring {
+  --ring-size: 16px;
+  margin-bottom: 6px;
+  display: inline-block;
+  width: var(--ring-size);
+  height: var(--ring-size);
+  text-align: center;
+  line-height: calc(var(--ring-size) - 2px);
+  border-radius: 100%;
+  border: 1px solid var(--light-slate-blue);
+  color: var(--night-rider);
+  /* opacity: 0.7; */
+  font-weight: 600;
+  font-size: 8px;
 }
 
 
@@ -351,7 +369,10 @@ transform: rotate(180deg);
 }
 
 .edit-btn__icon {
-  fill: var(--light-slate-blue);
+  /* fill: var(--light-slate-blue); */
+  background-image: url(../img/edit.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .load__icon {
@@ -379,7 +400,9 @@ transform: rotate(180deg);
 }
 
 .delete-btn__icon {
-  fill: var(--burnt-sienna);
+  background-image: url(../img/delete.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .delete-load__icon {
@@ -414,15 +437,18 @@ transform: rotate(180deg);
   width: 23px;
   height: 16px;
   margin-right: 10px; 
-  fill: var(--light-slate-blue);
-  transition: fill 0.3s ease-in-out;
+  /* fill: var(--light-slate-blue); */
+  /* transition: fill 0.3s ease-in-out; */
+  background-image: url(../img/add_client.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .add-client__btn:hover,
 .add-client__btn:hover .add-client__icon {
   color: var(--white);
   background-color: var(--perfume);
-  fill: var(--white);
+  /* fill: var(--white); */
 }
 
 .add-client__btn:focus,
@@ -430,7 +456,7 @@ transform: rotate(180deg);
   outline: none;
   color: var(--white);
   background-color: var(--perfume);
-  fill: var(--white);
+  /* fill: var(--white); */
 }
 
 .add-client__btn:active,
@@ -438,7 +464,7 @@ transform: rotate(180deg);
   color: var(--white);
   background-color: var(--medium-slate-blue);
   border: 1px solid var(--light-slate-blue);
-  fill: var(--white);
+  /* fill: var(--white); */
 }
 
 .add-client__btn_disabled {
