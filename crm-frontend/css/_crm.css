@@ -305,28 +305,27 @@ transform: rotate(180deg);
 
 /* Всплывающая подсказка */
 .tooltip {
-  display: flex;
-  position: absolute;
-  top: -212%;
-  left: -357%;  
+  position: fixed;
   padding: 7px 14px;
-  background-color: black;
-/*   opacity: 0; */
-  transition: 0.3s ease-in-out;
+  background-color: var(--night-rider);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .tooltip__title {
-  padding-right: 2px;
+  display: inline-block;
+  margin-right: 4px;
   font-size: 12px;
-  font-weight: 700;
   line-height: 16px;
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .tooltip__value {
+  display: inline-block;
   font-size: 12px;
   line-height: 16px;
-  color: #9873FF;
+  font-weight: 700;
+  color: var(--white);
 }
 
 .tooltip::after {
@@ -334,12 +333,12 @@ transform: rotate(180deg);
 	border: solid transparent;
 	position: absolute;    
 	left: calc(50% - 5px);    
-	bottom: -12px;
+	bottom: -9px;
   width: 0;
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-top: 9px solid #5B46A9;
+	border-top: 9px solid var(--night-rider);
 }
 /* --- */
 
@@ -908,6 +907,12 @@ transform: rotate(180deg);
   line-height: 19px;
   color: var(--night-rider);
 }
+
+.color_light-slate-blue {
+  color: var(--light-slate-blue); 
+}
+
+
 /* --- */
 
 

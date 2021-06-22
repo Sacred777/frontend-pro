@@ -60,17 +60,17 @@
     tableBox.classList.add('table__box');
     table.classList.add('table');
     headTr.classList.add('table-head__row');
-    headThId.classList.add('table-head__cells', 'table-head_id');
+    headThId.classList.add('table-head__cells', 'table-head_id', 'table__column_sort');
     headThIdTitle.classList.add('head-id__title');
     headThIdImg.classList.add('table-head__icon');
-    headThFullname.classList.add('table-head__cells', 'table-head_fullname');
+    headThFullname.classList.add('table-head__cells', 'table-head_fullname', 'table__column_sort');
     headThFullnameTitle.classList.add('head-fullname__title');
     headThFullnameImg.classList.add('table-head__icon', 'rotate_180');
     headThFullnameDescr.classList.add('head-fullname__descr');
-    headThCreatedate.classList.add('table-head__cells', 'table-head_createdate');
+    headThCreatedate.classList.add('table-head__cells', 'table-head_createdate', 'table__column_sort');
     headThCreatedateTitle.classList.add('head-createdate__title');
     headThCreatedateImg.classList.add('table-head__icon', 'rotate_180');
-    headThUpdatedate.classList.add('table-head__cells', 'table-head_updatedate');
+    headThUpdatedate.classList.add('table-head__cells', 'table-head_updatedate', 'table__column_sort');
     headThUpdatedateTitle.classList.add('head-updatedate__title');
     headThUpdatedateImg.classList.add('table-head__icon', 'rotate_180');
     headThContacts.classList.add('table-head__cells');
@@ -79,12 +79,13 @@
     title.innerText = 'Клиенты';
     headThId.setAttribute('id', 'id');
     headThIdTitle.innerText = 'ID';
+    // headThIdTitle.setAttribute('data-sort', 'true');
     headThFullname.setAttribute('id', 'fullname');
     headThFullnameTitle.innerText = 'Фамилия Имя Отчество';
     headThFullnameDescr.innerText = 'А-Я';
-    headThCreatedate.setAttribute('id', 'createdate');
+    headThCreatedate.setAttribute('id', 'createdAt');
     headThCreatedateTitle.innerText = 'Дата и время создания';
-    headThUpdatedate.setAttribute('id', 'updatedate');
+    headThUpdatedate.setAttribute('id', 'updatedAt');
     headThUpdatedateTitle.innerText = 'Последние изменения';
     headThContacts.setAttribute('id', 'contacts');
     headThContacts.innerText = 'Контакты';
@@ -170,7 +171,24 @@
   };
 
   // Вставляем данные в таблицу
-  function insertClientsData(clientsArray) {
+  function insertClientsData(clientsObject) {
+    let clientsArray = [];
+    switch (clientsObject.columnOfSort) {
+      case 'fullname':
+        clientsArray = sortClientsByFullname(clientsObject.clients, clientsObject.stateOfSort.fullname);
+      break;
+      case 'createdAt':
+        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.field, clientsObject.stateOfSort.createdAt);
+      break;
+      case 'updatedAt':
+        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.field, clientsObject.stateOfSort.updatedAt);
+      break;
+      default:
+        clientsArray = sortClientsById(clientsObject.clients, clientsObject.stateOfSort.id);
+    };
+
+    markColumnOfSort(clientsObject.columnOfSort, clientsObject.stateOfSort);
+
     const tbody = deleteTableRows();
     clientsArray.forEach( (e) => {
       const tr = document.createElement('tr');
@@ -296,7 +314,8 @@
         const span = document.createElement('span');
         li.classList.add('contacts__item');
         span.classList.add('contacts__icon_ring');
-        span.innerText = '+' + (arreyLength - i); //TODO Нарисовать окружность и внутри цифру
+        span.setAttribute('data-value', 'Развернуть');
+        span.innerText = '+' + (arreyLength - i);
         li.append(span);
         ul.append(li);
         visible = false;
@@ -319,9 +338,13 @@
       li.classList.add('blocked');
     };
     img.classList.add('contacts__icon');
-
-    li.setAttribute('data-type', contact.type);
-    li.setAttribute('data-value', contact.value);
+    
+    if (contact.type === 'Другое') {
+      img.setAttribute('data-type', '');
+    } else {
+      img.setAttribute('data-type', contact.type + ':');
+    };
+    img.setAttribute('data-value', contact.value);
 
 
     switch(contact.type) {
@@ -375,6 +398,30 @@
      return ClientsArray.sort((a, b) => new Date(a[fied]).getTime() > new Date(b[fild]).getTime() ? 1 : -1);
   }
 
+  // Маркировка столбца сортировки
+  function markColumnOfSort(column, sorting) {
+    console.log(column, sorting);
+    const columns = document.querySelectorAll('.table__column_sort');
+    columns.forEach((e) => {
+      if (e.id === column) {
+        e.childNodes[0].classList.add('color_light-slate-blue');
+      } else {
+        e.childNodes[0].classList.remove('color_light-slate-blue')
+      };
+      if (sorting[e.id]) {
+        e.childNodes[1].classList.remove('rotate_180');
+        if (e.id === 'fullname') {
+          e.childNodes[2].innerText = 'Я-А';
+        };              
+      } else {
+        e.childNodes[1].classList.add('rotate_180');
+        if (e.id === 'fullname') {
+          e.childNodes[2].innerText = 'А-Я';
+        };
+      };
+    });
+  };
+
   // Удаление tbody таблицы чтобы её данные для отображения
   function deleteTableRows() {
     const tbody = document.querySelector('tbody');
@@ -383,6 +430,63 @@
     }
     return tbody;
   };
+
+  // Показываю тултипы [data-type] и [data-value]
+  function showTooltips() {
+    let tooltipElememt;
+    let tooltipTypeElement;
+    let tooltipValueElement;
+    document.onmouseover = function(event) {
+      let target = event.target;
+      let tooltipType = target.dataset.type;
+      let tooltipValue = target.dataset.value;
+      // console.log(tooltipType);
+      // console.log(tooltipValue);
+
+      if (!tooltipType & !tooltipValue) return;
+
+      tooltipElememt = document.createElement('div');
+      tooltipValueElement = document.createElement('span');
+      
+      tooltipElememt.classList.add('tooltip');
+      tooltipValueElement.classList.add('tooltip__value');
+
+      if (tooltipType) {
+        tooltipTypeElement = document.createElement('span');
+        tooltipTypeElement.classList.add('tooltip__title');
+        tooltipTypeElement.innerText = tooltipType;
+        tooltipElememt.append(tooltipTypeElement);
+        tooltipValueElement.classList.add('color_light-slate-blue');
+      };  
+
+      tooltipValueElement.innerText = tooltipValue;
+
+      tooltipElememt.append(tooltipValueElement);
+      document.body.append(tooltipElememt);
+
+      let coords = target.getBoundingClientRect();
+
+      let left = coords.left + (target.offsetWidth - tooltipElememt.offsetWidth) / 2;
+      if (left < 0) left = 0;
+
+      let top = coords.top - tooltipElememt.offsetHeight - 10;
+      if (top < 0) { // если подсказка не помещается сверху, то отображать её снизу
+      top = coords.top + target.offsetHeight + 10;
+       }
+
+      tooltipElememt.style.left = left + 'px';
+      tooltipElememt.style.top = top + 'px';
+      tooltipElememt.style.opacity = 1;
+    };
+    
+    document.onmouseout = function(e) {
+      if (tooltipElememt) {
+        tooltipElememt.remove();
+        tooltipElememt = null;
+      };
+    };
+  };
+
 
   // ============================
   // Серверная часть
@@ -501,63 +605,66 @@
   document.addEventListener('DOMContentLoaded', () => {
     async function createApp() {
       const container = document.getElementById('crm-app');
-      const header = createHeader(); //Создаем шапку
-      const tableHead = createTableHead();
-      const tableBody = createTableBody();
-      const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах
-      const ascending = true; // TODO этого не нужно будет Признак сортировки по возрастанию
+      const header = createHeader(); //Создаю шапку сайта с лого и поиском
+      const tableHead = createTableHead(); //Создаю шапку таблицы
+      const tableBody = createTableBody(); //Создаю тело таблицы для вставки данных о клиентах
+      const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах  Создаю кнопку "Добавить клиента"
+      // const ascending = true; // TODO этого не нужно будет Признак сортировки по возрастанию
 
+      // Объект состояния клиентов (сортировка, массив объектов клиентов)
       const clientsState = {
-        field: 'id',
-        ascending: true,
+        // field: 'id',
+        columnOfSort: 'id',
+        stateOfSort: {
+          id: true,
+          fullname: false,
+          createdAt: false,
+          updatedAt: false,
+        },
         clients: [],
       };
 
-      container.append(header.header);
-      container.append(tableHead.main);
-      tableHead.tableBox.append(tableBody.tableBody);
-      tableHead.main.append(addBtn.wraper);
+      container.append(header.header); //Добавил шапку сайта в контейнер сайта
+      container.append(tableHead.main); //Добавил шапку таблицы в контейнер сайта
+      tableHead.tableBox.append(tableBody.tableBody); //Добавил в шапку таблицы тело таблицы
+      tableHead.main.append(addBtn.wraper); //Добвил в секцию main кнопку "Довавить клиента"
 
-      //в fetchGetClients() реализована задержка, чтобы посмотреть как работает оверлей
-      // header.input.setAttribute('disabled', 'disabled'); //дактивировал input поиска до загрузки данных он не нужен
-      header.input.disabled = true;
-      tableBody.overlay.classList.remove('blocked'); //Показываю оверлей
-      const getClients = await fetchGetClients(); //TODO этого не нужно будет Получил массив объектов из базы в переменную
-      clientsState.clients = await fetchGetClients(); // Это хорошо, записываем прямо в объект
-      console.log(clientsState);
-      const clientsArray = getClients.slice(); //Сделал копию массива, буду работать с ней
-      const insertClientsDataElement = insertClientsData(sortClientsById(clientsArray, ascending)); // вставил в таблицу отсортированные по ID данные
-      // TODO нужно подкрасить в заголовке поле по которому происходит сортировка
+      header.input.disabled = true; //Деактивировал инпут поиска клиентов
+      tableBody.overlay.classList.remove('blocked'); //TODO анимация. Показываю оверлей
+      clientsState.clients = await fetchGetClients(); //Записал массив объектов клиентов в объект состояния
+      const insertClientsDataElement = insertClientsData(clientsState); //TODO не знаю нужна ли здесь переменная. Вставил клиентские данные в таблицу с учетом сортировки  
 
-      // console.log(insertClientsDataElement);
+      tableBody.overlay.classList.add('blocked'); //TODO анимация скрыл оверлей
+      header.input.disabled = false; //Снял блокировку с input поиска
 
-      tableBody.overlay.classList.add('blocked'); //скрываю оверлей
-      // header.input.removeAttribute('disabled'); //разблокирую input поиска 
-      header.input.disabled = false; //Снял блокировку с input 
+      showTooltips(); // Показываю тултипы
       
       //вешаю событие на input c задержкой времени
       const DELAY_TIME = 300; //300 мс установлено тех. заданием
       let timeoutId = null;
       header.input.addEventListener('input', () => {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {findContacts()}, DELAY_TIME); //попробуй передать аргумент head и insertClientsDataElement
+        timeoutId = setTimeout(() => {findContacts()}, DELAY_TIME); //TODO попробуй передать аргумент head и insertClientsDataElement
       });
 
-      async function findContacts() { //сюда бы передать header
+      async function findContacts() { //TODO сюда бы передать header. Ищу клиентов по введенным данным в input
         const inputValue = header.input.value.trim();
         if (inputValue) {
-          const foundClients = await fetchSearchClients(inputValue);
-          if (foundClients.length) {
-            insertClientsData(sortClientsById(foundClients, ascending)) // TODO скорее сортировка по ID по увеличению или брать текущую сотрировку
+          clientsState.clients = await fetchSearchClients(inputValue);
+          if (clientsState.clients.length) {
+            insertClientsData(clientsState);
           } else {
             deleteTableRows();
           };
         } else {
-          insertClientsData(sortClientsById(clientsArray, ascending));
+          clientsState.clients = await fetchGetClients();
+          insertClientsData(clientsState);
         };
       };
+  
+
     };
-    
+      
     createApp();
 
   });
