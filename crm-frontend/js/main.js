@@ -178,10 +178,10 @@
         clientsArray = sortClientsByFullname(clientsObject.clients, clientsObject.stateOfSort.fullname);
       break;
       case 'createdAt':
-        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.field, clientsObject.stateOfSort.createdAt);
+        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.createdAt);
       break;
       case 'updatedAt':
-        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.field, clientsObject.stateOfSort.updatedAt);
+        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.updatedAt);
       break;
       default:
         clientsArray = sortClientsById(clientsObject.clients, clientsObject.stateOfSort.id);
@@ -314,6 +314,7 @@
         const span = document.createElement('span');
         li.classList.add('contacts__item');
         span.classList.add('contacts__icon_ring');
+        li.setAttribute('id', 'comb');
         span.setAttribute('data-value', 'Развернуть');
         span.innerText = '+' + (arreyLength - i);
         li.append(span);
@@ -385,22 +386,25 @@
   // Сорировка списка клиентов по полю Ф.И.О.
   function sortClientsByFullname(ClientsArray, ascending) {
     if (ascending) {
-      return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() > b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+      return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() < b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
      }
-     return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() < b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+     return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() > b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
   }
 
   // Сорировка списка клиентов по полю Дата и время создания
-  function sortClientsByDate(ClientsArray, fied, ascending) {
+  function sortClientsByDate(ClientsArray, field, ascending) {
+    // console.log(ClientsArray);
+    // console.log(field);
+    // console.log(ascending);
     if (ascending) {
-      return ClientsArray.sort((a, b) => new Date(a[fied]).getTime() > new Date(b[fild]).getTime() ? 1 : -1);
+      return ClientsArray.sort((a, b) => new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1);
     }
-     return ClientsArray.sort((a, b) => new Date(a[fied]).getTime() > new Date(b[fild]).getTime() ? 1 : -1);
+     return ClientsArray.sort((a, b) => new Date(a[field]).getTime() < new Date(b[field]).getTime() ? 1 : -1);
   }
 
   // Маркировка столбца сортировки
   function markColumnOfSort(column, sorting) {
-    console.log(column, sorting);
+    // console.log(column, sorting);
     const columns = document.querySelectorAll('.table__column_sort');
     columns.forEach((e) => {
       if (e.id === column) {
@@ -661,10 +665,44 @@
           insertClientsData(clientsState);
         };
       };
-  
 
-    };
       
+      tableHead.main.addEventListener('click', (e) => {
+        let target;
+        if (e.target.id) {
+          target = e.target;
+        } else if (e.target.parentNode.id){
+          target = e.target.parentNode;
+        };
+
+        if (!target) return;
+        // console.log(target.id);
+
+        if (target.id === 'id' || target.id === 'fullname' || target.id === 'createdAt' || target.id === 'updatedAt') {
+          // console.log('Условие выполнилось');
+          clientsState.columnOfSort = target.id;
+          if (clientsState.stateOfSort[target.id]) {
+            clientsState.stateOfSort[target.id] = false;
+          } else {
+            clientsState.stateOfSort[target.id] = true;
+          };
+          insertClientsData(clientsState);
+        };
+
+        if (target.id === 'comb') {
+          const contactsElement = tableBody.tableBody.querySelectorAll('.contacts__item');
+          contactsElement.forEach((el) => {
+            if (el.id) {
+              el.classList.add('blocked');  
+            } else {
+              el.classList.remove('blocked');
+            };
+          });
+        };
+
+      });
+    };
+    
     createApp();
 
   });
