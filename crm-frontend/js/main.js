@@ -150,22 +150,22 @@
   
   // Создаем кнопку добавления клинета
   function createAddClientBtn() {
-    const btnWraper = document.createElement('div');
+    const btnWrapper = document.createElement('div');
     const btn = document.createElement('button');
     const text = document.createElement('span');
     const icon = document.createElement('span');
   
-    btnWraper.classList.add('add-client');
+    btnWrapper.classList.add('add-client');
     btn.classList.add('add-client__btn', 'btn');
     icon.classList.add('add-client__icon');
     text.innerText = 'Добавить клиента';
   
     btn.append(icon);
     btn.append(text);
-    btnWraper.append(btn);
+    btnWrapper.append(btn);
 
     return {
-      wraper: btnWraper, 
+      wrapper: btnWrapper, 
       btn, 
     };
   };
@@ -217,16 +217,16 @@
       tdId.classList.add('row__cells', 'body-cells_id');
       tdFullname.classList.add('row__cells', 'body-cells_fullname');
       tdCreateDate.classList.add('row__cells');
-      wrapCreateDate.classList.add('cell-create__wraper');
+      wrapCreateDate.classList.add('cell-create__wrapper');
       createDate.classList.add('cell-create__date');
       createTime.classList.add('cell-create__time');
       tdUpdateDate.classList.add('row__cells');
-      wrapUpdateDate.classList.add('cell-update__wraper');
+      wrapUpdateDate.classList.add('cell-update__wrapper');
       updateDate.classList.add('cell-update__date');
       updateTime.classList.add('cell-update__time');
       tdContacts.classList.add('row__cells');
       tdActions.classList.add('row__cells');
-      wrapActions.classList.add('actions__wraper');
+      wrapActions.classList.add('actions__wrapper');
       btnEdit.classList.add('edit-btn', 'btn');
       btnEditImg.classList.add('actions-btn__icon', 'edit-btn__icon');
       btnEditText.classList.add('edit-btn__text');
@@ -375,6 +375,22 @@
     return li;
   };
 
+  // Сортировка данных в таблице в первом аргументе объект, во втоом tableHead.tr
+  function sortDataInTable(clientsState, tableHeadElement) {
+    const thElements = tableHeadElement.querySelectorAll('.table__column_sort');
+    thElements.forEach((e) => {
+      e.addEventListener('click', function() {
+        clientsState.columnOfSort = e.id;
+          if (clientsState.stateOfSort[e.id]) {
+            clientsState.stateOfSort[e.id] = false;
+          } else {
+            clientsState.stateOfSort[e.id] = true;
+          };
+          insertClientsData(clientsState);  
+      })
+    })  
+  }
+
   // Сорировка списка клиентов по полю ID
   function sortClientsById(ClientsArray, ascending) {
     if (ascending) {
@@ -425,6 +441,40 @@
       };
     });
   };
+
+  // Функция удаления клиента из таблицы
+  function deleteClient(tableBodyElement) {
+    //собираем массив кнопок по delete-btn
+    const btns = tableBodyElement.querySelectorAll('.delete-btn');
+    btns.forEach((e) => {
+      e.addEventListener('click', async function(el) {
+          console.log(this.dataset.id);
+
+          // TODO нужен Тип окна для стилей. Объект для модалки 
+          const modalObj = {
+            headTitle: 'Удалить клиента',
+            errorText: 'Вы действительно хотите удалить данного клиента?',
+            btnSubmit: 'Удалить',
+            btn: 'Отмена ',
+          };
+
+          // получаем данные из базы о клиенте с id
+          const client = await fetchGetClientById(this.dataset.id);
+
+          console.log(modalObj);
+          console.log(client);
+
+          createModalWindow(client, modalObj);
+
+      });
+    });
+    // вешаем обработчик на клик
+    // если кликаем, модальное окно с подтверждением удаления
+    // если подтверждаем удаление берем data-id и вызываем функцию удаления клиента
+    // после этого получаем данные клиентов из базы и прорисовываем таблицу
+
+
+  }
 
   // Удаление tbody таблицы чтобы её данные для отображения
   function deleteTableRows() {
@@ -491,10 +541,463 @@
     };
   };
 
+  // Показываю все контакты клинета по нажатию на Comb кнопку
+  function showAllContacts(tableBodyElement) {
+    const combElement = tableBodyElement.querySelectorAll('#comb');
+    combElement.forEach((e) => {
+      e.addEventListener('click', function() {
+        const contactsElement = e.parentNode.querySelectorAll('.contacts__item');
+        contactsElement.forEach((el) => {
+         if (el.id) {
+            el.classList.add('blocked');  
+         } else {
+            el.classList.remove('blocked');
+          };
+        });
+      });
+    });
+  }
+
+  // Создаем модалку
+  function createModalWindow(client, structure) {
+    // console.log(client);
+    // console.log(structure);
+
+    // Создает контейнер
+    const modal = document.createElement('div');
+    const wrapper = document.createElement('div');
+    const btnWindowClose = document.createElement('span');
+  
+    modal.classList.add('modal');
+    wrapper.classList.add('modal__wrapper');
+    btnWindowClose.classList.add('modal__close');
+    btnWindowClose.setAttribute('data-btn', 'close');
+  
+    wrapper.append(btnWindowClose);
+    
+    // ID передаём только в модалке по изменению данных клиента
+    let idValue = null;
+    if (structure.type === 'change') {
+      idValue = client.id; 
+    }
+    
+    // Получил шапку модалки header элемент
+    const headerElement = createHeadOfModal(structure.headTitle(), idValue);
+    wrapper.append(headerElement); //вставил шапку
+    
+     
+    // Создал форму
+    const formElement = document.createElement('form');
+    formElement.classList.add('modal__form');
+    formElement.setAttribute('action', '#');
+
+    // form.append(fieldsetClientName);
+    // form.append(fieldsetContacts);
+    // form.append(wrapperError);
+    // form.append(wrapperBtns);
+
+
+    if (structure.type !== 'delete') {
+      // Блок с ФИО клиента
+      const clietntNameElement = createClientNameOfModal(client.lastName, client.name, client.surname);
+      formElement.append(clietntNameElement);
+      
+      const clientContactsElement = createClientContactsOfModal(client.contacts);
+      
+      // Блок с контактами и кнопкой "Добавить клиента"
+      formElement.append(clientContactsElement.fieldsetContacts);
+      wrapper.append(formElement);  
+    } else {
+      const errorElement = createErrorForModal ('Вы действительно хотите удалить данного клиента?');
+      wrapper.append(errorElement);
+    };
+
+    // Блок кнопок
+    const btnsElement = createBtnsForModal(structure.btnSubmit(), structure.btn());
+    wrapper.append(btnsElement.wrapperBtns);
+
+    
+    ;  
+      
+        
+    
+    if (structure.fieldsats) {
+      // const fieldsetClientName = document.createElement('fieldset');
+      // const wrapperClientName = document.createElement('div');
+      // const lableLastname = document.createElement('lable');
+      // const asterixLastname = document.createElement('span');
+      // const inputLastname = document.createElement('input');
+      // const lableName = document.createElement('lable');
+      // const asterixName = document.createElement('span');
+      // const inputName = document.createElement('input');
+      // const lableSurname = document.createElement('lable');
+      // const inputSurname = document.createElement('input');
+      // const fieldsetContacts = document.createElement('fieldset');
+      // const wrapperContacts = document.createElement('div');
+      // const listOfContacts = document.createElement('ul');
+      // const btnAddContact = document.createElement('button');
+      // const btnAddContactIcon = document.createElement('span');
+      // const btnAddContactTitle = document.createElement('span');
+
+      // fieldsetClientName.classList.add('fieldset_reset');
+      // wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
+      // lableLastname.classList.add('modal__lable');
+      // asterixLastname.classList.add('lable_asterix');
+      // inputLastname.classList.add('input', 'modal__intup', 'blocked');
+      // lableName.classList.add('modal__lable');
+      // asterixName.classList.add('lable_asterix');
+      // inputName.classList.add('input', 'modal__intup', 'blocked');    
+      // lableSurname.classList.add('modal__lable');
+      // inputSurname.classList.add('input', 'modal__intup', 'blocked');    
+      // fieldsetContacts.classList.add('modal-contacts', 'fieldset_reset');
+      // wrapperContacts.classList.add('modal__container');
+      // listOfContacts.classList.add('modal-contacts__list');
+      // btnAddContact.classList.add('modal-addcontact__btn', 'btn');
+      // btnAddContactIcon.classList.add('modal-addcontact__icon');
+      // btnAddContactTitle.classList.add('modal-addcontact__title');
+      
+      // lableLastname.setAttribute('for', 'lastname');
+      // inputLastname.setAttribute('id', 'lastname');
+      // inputLastname.setAttribute('data-input', 'lastname');
+      // inputLastname.setAttribute('type', 'text');
+      // inputLastname.setAttribute('name', 'lastname');
+      // inputLastname.setAttribute('autofocus', 'true');
+      // lableName.setAttribute('for', 'name');
+      // inputName.setAttribute('id', 'name');
+      // inputName.setAttribute('data-input', 'name');
+      // inputName.setAttribute('type', 'text');
+      // inputName.setAttribute('name', 'name');
+      // lableSurname.setAttribute('for', 'surname');
+      // inputSurname.setAttribute('id', 'surname');
+      // inputSurname.setAttribute('data-input', 'surname');
+      // inputSurname.setAttribute('type', 'text');
+      // inputSurname.setAttribute('name', 'surname');
+      // btnAddContact.setAttribute('data-btn','contact-add');
+
+      // lableLastname.innerText = 'Фамилия';
+      // asterixLastname.innerText = '*';
+      // lableName.innerText = 'Имя';
+      // asterixName.innerText = '*';     
+      // lableSurname.innerText = 'Отчество';
+      // btnAddContactTitle.innerText = 'Добавить контакт';
+
+      // if (client) {
+      //   console.log(client);
+      //   inputLastname.classList.remove('blocked');
+      //   inputName.classList.remove('blocked');
+      //   inputSurname.classList.remove('blocked');
+      //   inputLastname.value = client.lastName;
+      //   inputName.value = client.name;
+      //   inputSurname.value = client.surname;
+        
+      //   if (client.contacts) {
+      //     console.log(client.contacts);
+      //     client.contacts.forEach((el) => {
+      //       const contactItem = createContactForModal(el);
+      //       listOfContacts.append(contactItem);
+      //       console.log(contactItem);
+      //     });
+      //   };
+
+      // };
+
+      // if (structure.errorText) {
+      //   spanError.innerText = structure.errorText;
+      //   wrapperError.classList.remove('blocked');
+      // }
+
+      // lableLastname.append(asterixLastname);
+      // lableName.append(asterixName);
+      
+      // wrapperClientName.append(lableLastname);
+      // wrapperClientName.append(inputLastname);
+      // wrapperClientName.append(lableName);
+      // wrapperClientName.append(inputName);
+      // wrapperClientName.append(lableSurname);
+      // wrapperClientName.append(inputSurname);
+      // fieldsetClientName.append(wrapperClientName);
+
+      // wrapperContacts.append(listOfContacts);
+      // btnAddContact.append(btnAddContactIcon);
+      // btnAddContact.append(btnAddContactTitle);
+      // wrapperContacts.append(btnAddContact);
+      // fieldsetContacts.append(wrapperContacts);
+
+      // wrapperError.append(spanError);
+
+      // btnSubmit.append(btnSubmitIcon);
+      // btnSubmit.append(btnSubmitTitle);
+      // wrapperBtns.append(btnSubmit);
+      // wrapperBtns.append(btnSmall);
+
+      // form.append(fieldsetClientName);
+      // form.append(fieldsetContacts);
+      // form.append(wrapperError);
+      // form.append(wrapperBtns);
+    }  
+    
+    modal.append(wrapper);
+    document.body.append(modal);
+
+    return modal;
+  };
+
+  // Шапка модалки
+  function createHeadOfModal(title, idValue) {
+    const header = document.createElement('div');
+    const headerTitle = document.createElement('h2');
+    
+    header.classList.add('modal__header', 'modal__container');
+    headerTitle.classList.add('modal-header__heading');
+    
+    headerTitle.textContent = title;
+
+    header.append(headerTitle);
+
+    if (idValue) {
+      const headerInfo = document.createElement('span');
+      headerInfo.classList.add('modal-header__id');
+      headerInfo.innerText = `ID: ${idValue.slice(-6)}`;
+      header.append(headerInfo);
+    }
+
+    return header;
+  }
+
+  // Часть формы с ФИО клиента
+  function createClientNameOfModal(lastName, name, surname) {
+    // console.log(lastName, name, surname);
+    const fieldsetClientName = document.createElement('fieldset');
+    const wrapperClientName = document.createElement('div');
+    const lableLastname = document.createElement('lable');
+    const asterixLastname = document.createElement('span');
+    const inputLastname = document.createElement('input');
+    const lableName = document.createElement('lable');
+    const asterixName = document.createElement('span');
+    const inputName = document.createElement('input');
+    const lableSurname = document.createElement('lable');
+    const inputSurname = document.createElement('input');
+
+    fieldsetClientName.classList.add('fieldset_reset');
+    wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
+    lableLastname.classList.add('modal__lable');
+    asterixLastname.classList.add('lable_asterix');
+    inputLastname.classList.add('input', 'modal__intup', 'blocked');
+    lableName.classList.add('modal__lable');
+    asterixName.classList.add('lable_asterix');
+    inputName.classList.add('input', 'modal__intup', 'blocked');    
+    lableSurname.classList.add('modal__lable');
+    inputSurname.classList.add('input', 'modal__intup', 'blocked');    
+    
+    lableLastname.setAttribute('for', 'lastname');
+    inputLastname.setAttribute('id', 'lastname');
+    inputLastname.setAttribute('data-input', 'lastname');
+    inputLastname.setAttribute('type', 'text');
+    inputLastname.setAttribute('name', 'lastname');
+    inputLastname.setAttribute('autofocus', 'true');
+    lableName.setAttribute('for', 'name');
+    inputName.setAttribute('id', 'name');
+    inputName.setAttribute('data-input', 'name');
+    inputName.setAttribute('type', 'text');
+    inputName.setAttribute('name', 'name');
+    lableSurname.setAttribute('for', 'surname');
+    inputSurname.setAttribute('id', 'surname');
+    inputSurname.setAttribute('data-input', 'surname');
+    inputSurname.setAttribute('type', 'text');
+    inputSurname.setAttribute('name', 'surname');
+
+    lableLastname.textContent = 'Фамилия';
+    asterixLastname.textContent = '*';
+    lableName.textContent = 'Имя';
+    asterixName.textContent = '*';     
+    lableSurname.textContent = 'Отчество';
+
+
+    if (lastName + name + surname) {
+      inputLastname.classList.remove('blocked');
+      inputName.classList.remove('blocked');
+      inputSurname.classList.remove('blocked');
+      inputLastname.value = lastName;
+      inputName.value = name;
+      inputSurname.value = surname;
+    };
+
+
+
+    lableLastname.append(asterixLastname);
+    lableName.append(asterixName);
+    
+    wrapperClientName.append(lableLastname);
+    wrapperClientName.append(inputLastname);
+    wrapperClientName.append(lableName);
+    wrapperClientName.append(inputName);
+    wrapperClientName.append(lableSurname);
+    wrapperClientName.append(inputSurname);
+    fieldsetClientName.append(wrapperClientName);
+
+    return fieldsetClientName;
+  }
+
+
+  // Часть формы контактов клиента
+  function createClientContactsOfModal(contacts) {
+    // console.log(contacts);
+    const fieldsetContacts = document.createElement('fieldset');
+    const wrapperContacts = document.createElement('div');
+    const listOfContacts = document.createElement('ul');
+
+    fieldsetContacts.classList.add('modal-contacts', 'fieldset_reset');
+    wrapperContacts.classList.add('modal__container');
+    listOfContacts.classList.add('modal-contacts__list');
+
+    wrapperContacts.append(listOfContacts);
+        
+    if (contacts) {
+      // console.log(client.contacts);
+      contacts.forEach((el) => {
+        const contactItem = createContactForModal(el);
+        listOfContacts.append(contactItem);
+        // console.log(contactItem);
+      });
+    };
+
+    // Кнопка добавить клиента    
+    const btnAddContactElement = createBtnAddContactForModal();
+    fieldsetContacts.append(wrapperContacts);
+    fieldsetContacts.append(btnAddContactElement);
+
+    return {
+      fieldsetContacts,
+      btnAddContactElement,
+    };    
+  };
+
+  // Создал элемент списка контактов с кнопкой "Удалить"
+  function createContactForModal(contact) {
+    const contactItem = document.createElement('li');
+    const wrapContactType = document.createElement('div');
+    const btnContactType = document.createElement('button');
+    const btnContactTypeTitle = document.createElement('span');
+    const btnContactTypeIcon = document.createElement('span');
+    const wrapContactTypeDropdown = document.createElement('div');
+    const wrapContactTypeDropdownList = document.createElement('ul');
+    const inputContactValue = document.createElement('input');
+    const btnContactDelete = document.createElement('button');
+    const btnContactDeleteIcon = document.createElement('span');
+
+    contactItem.classList.add('modal-contacts__item');
+    wrapContactType.classList.add('contacts-type');
+    btnContactType.classList.add('contact-type__button', 'btn');
+    btnContactTypeTitle.classList.add('contact-type__title');
+    btnContactTypeIcon.classList.add('contact-type__icon');
+    wrapContactTypeDropdown.classList.add('contact-type__dropdown', 'blocked');
+    wrapContactTypeDropdownList.classList.add('contact-type__list');
+    inputContactValue.classList.add('input', 'contact-value', 'contact-value_border-right');
+    inputContactValue.setAttribute('type', 'text');
+    inputContactValue.setAttribute('placeholder', 'Введите данные контакта');
+    btnContactDelete.classList.add('delete-contact__btn', 'btn', 'blocked');
+    btnContactDeleteIcon.classList.add('delete-contact__icon');
+
+    btnContactTypeTitle.textContent = 'Тип контакта';
+
+    contactsType.forEach((e) => {
+      const item = document.createElement('li');
+      item.classList.add('contact-type__item');
+      item.textContent = e;
+      wrapContactTypeDropdownList.append(item);
+    })
+
+    if (contact) {
+      btnContactTypeTitle.textContent = contact.type;
+      inputContactValue.value = contact.value;
+      btnContactDelete.classList.remove('blocked');
+    };
+
+    btnContactType.append(btnContactTypeTitle);
+    btnContactType.append(btnContactTypeIcon);
+    
+    wrapContactTypeDropdown.append(wrapContactTypeDropdownList);
+    
+    wrapContactType.append(btnContactType);
+    wrapContactType.append(wrapContactTypeDropdown);
+
+    btnContactDelete.append(btnContactDeleteIcon);
+
+    contactItem.append(wrapContactType);
+    contactItem.append(inputContactValue);
+    contactItem.append(btnContactDelete);
+
+    return contactItem;
+  };
+
+  // Создал кнопку добавления контакта 
+  function createBtnAddContactForModal() {
+    const btnAddContact = document.createElement('button');
+    const btnAddContactIcon = document.createElement('span');
+    const btnAddContactTitle = document.createElement('span');
+
+    btnAddContact.classList.add('modal-addcontact__btn', 'btn');
+    btnAddContactIcon.classList.add('modal-addcontact__icon');
+    btnAddContactTitle.classList.add('modal-addcontact__title');
+
+    btnAddContact.setAttribute('data-btn','contact-add');
+    btnAddContactTitle.textContent = 'Добавить контакт';
+
+    btnAddContact.append(btnAddContactIcon);
+    btnAddContact.append(btnAddContactTitle);
+
+    return btnAddContact;
+  }
+
+  // Создал блок с выводом ошибок и др. инфорации
+  function createErrorForModal(info) {
+    const wrapperError = document.createElement('div');
+    const spanError = document.createElement('span');
+    
+    wrapperError.classList.add('modal-error');
+    spanError.classList.add('modal-error__text');
+    
+    wrapperError.classList.remove('blocked');
+    spanError.textContent = info;
+
+    wrapperError.append(spanError);
+    
+    return wrapperError;
+  }
+
+  function createBtnsForModal(submitTitle, smallTitle) {
+    const wrapperBtns = document.createElement('div');
+    const btnSubmit = document.createElement('button');
+    const btnSubmitIcon = document.createElement('span');
+    const btnSubmitTitle = document.createElement('span');
+    const btnSmall = document.createElement('button');
+
+    wrapperBtns.classList.add('modal-btns');
+    btnSubmit.classList.add('submit-btn', 'btn');
+    btnSubmitIcon.classList.add('submit-btn__icon');
+    btnSubmitTitle.classList.add('submit-btn__title');
+
+    btnSmall.classList.add('modal-delete-btn', 'btn');
+
+    btnSubmitTitle.textContent = submitTitle;
+    btnSmall.textContent = smallTitle;    
+
+    btnSubmit.append(btnSubmitIcon);
+    btnSubmit.append(btnSubmitTitle);
+    wrapperBtns.append(btnSubmit);
+    wrapperBtns.append(btnSmall);
+
+    return {
+      wrapperBtns,
+      btnSubmit,
+      btnSmall,
+    };
+  };
 
   // ============================
   // Серверная часть
   const URI = 'http://localhost:3000/api/clients';
+  const visibleCss = 'visible';
 
   // TODO Это убрать. Только для тестов
   const delay = ms => {
@@ -604,17 +1107,32 @@
   // fetchDeleteClient('1619595050787');
 
 
+  
+  
+  // Массив типов контактов
+  const contactsType = ['Телефон','Facebook','VK','Email','Другое'];
+  
+  // Объект структуры модального окна  
+  const structure = {
+    type: 'new', // Может принимать значения delete, new, change
+
+    headTitle: function() {
+      return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
+    },
+
+    btnSubmit: function() {
+      return (this.type === 'delete') ? 'Удалить' : 'Сохранить'
+    },
+
+    btn: function() {
+      return (this.type === 'change') ? 'Удалить клиента' : 'Отмена'
+    },
+  };
+
 
   // Основная функция
   document.addEventListener('DOMContentLoaded', () => {
     async function createApp() {
-      const container = document.getElementById('crm-app');
-      const header = createHeader(); //Создаю шапку сайта с лого и поиском
-      const tableHead = createTableHead(); //Создаю шапку таблицы
-      const tableBody = createTableBody(); //Создаю тело таблицы для вставки данных о клиентах
-      const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах  Создаю кнопку "Добавить клиента"
-      // const ascending = true; // TODO этого не нужно будет Признак сортировки по возрастанию
-
       // Объект состояния клиентов (сортировка, массив объектов клиентов)
       const clientsState = {
         // field: 'id',
@@ -628,10 +1146,18 @@
         clients: [],
       };
 
+      const container = document.getElementById('crm-app');
+      const header = createHeader(); //Создаю шапку сайта с лого и поиском
+      const tableHead = createTableHead(); //Создаю шапку таблицы
+      const tableBody = createTableBody(); //Создаю тело таблицы для вставки данных о клиентах
+      const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах  Создаю кнопку "Добавить клиента"
+
+
+      
       container.append(header.header); //Добавил шапку сайта в контейнер сайта
       container.append(tableHead.main); //Добавил шапку таблицы в контейнер сайта
       tableHead.tableBox.append(tableBody.tableBody); //Добавил в шапку таблицы тело таблицы
-      tableHead.main.append(addBtn.wraper); //Добвил в секцию main кнопку "Довавить клиента"
+      tableHead.main.append(addBtn.wrapper); //Добвил в секцию main кнопку "Довавить клиента"
 
       header.input.disabled = true; //Деактивировал инпут поиска клиентов
       tableBody.overlay.classList.remove('blocked'); //TODO анимация. Показываю оверлей
@@ -666,41 +1192,33 @@
         };
       };
 
+      // Сортировка данных в таблице 
+      sortDataInTable(clientsState, tableHead.tr);
+
+      // Показываю скомбинированные контакты
+      showAllContacts(tableBody.tableBody);
       
-      tableHead.main.addEventListener('click', (e) => {
-        let target;
-        if (e.target.id) {
-          target = e.target;
-        } else if (e.target.parentNode.id){
-          target = e.target.parentNode;
-        };
+      // Удаляем клиента из таблицы
+      deleteClient(tableBody.tableBody);
+            
+      
+      // Модалка
+      // createModalWindow(client, structure)
+      // Формируем клиента
+      const client = {
+        lastName: "Прошоченко",
+        name: 'Егор',
+        surname: 'Фокович',
+        contacts: [{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'}],
+        // contacts: null,
+        id : '1624008199987',
+        // updatedAt: ''
+        // createdAt: ''
+      };
+      // Формируем модальное окно
+      // Вызываем модалку
+      createModalWindow(client, structure);
 
-        if (!target) return;
-        // console.log(target.id);
-
-        if (target.id === 'id' || target.id === 'fullname' || target.id === 'createdAt' || target.id === 'updatedAt') {
-          // console.log('Условие выполнилось');
-          clientsState.columnOfSort = target.id;
-          if (clientsState.stateOfSort[target.id]) {
-            clientsState.stateOfSort[target.id] = false;
-          } else {
-            clientsState.stateOfSort[target.id] = true;
-          };
-          insertClientsData(clientsState);
-        };
-
-        if (target.id === 'comb') {
-          const contactsElement = tableBody.tableBody.querySelectorAll('.contacts__item');
-          contactsElement.forEach((el) => {
-            if (el.id) {
-              el.classList.add('blocked');  
-            } else {
-              el.classList.remove('blocked');
-            };
-          });
-        };
-
-      });
     };
     
     createApp();

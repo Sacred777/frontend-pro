@@ -238,13 +238,13 @@ transform: rotate(180deg);
   color: var(--dark-gray);
 }
 
-.cell-create__wraper {
+.cell-create__wrapper {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.cell-update__wraper{
+.cell-update__wrapper{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -343,7 +343,7 @@ transform: rotate(180deg);
 }
 /* --- */
 
-.actions__wraper {
+.actions__wrapper {
  display: flex;
  flex-wrap: wrap;
  align-items: center;
@@ -499,7 +499,7 @@ transform: rotate(180deg);
   height: 100%;
 }
 
-.modal__wraper {
+.modal__wrapper {
   position: relative;
   width: 450px;
   margin: 0 auto;
@@ -725,8 +725,11 @@ transform: rotate(180deg);
   display: block;
   height: 16px;
   width: 16px;
-  fill: var(--dark-gray);
-  transition: fill 0.3s ease-in-out;
+  background-image: url(../img/delete_gray.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* fill: var(--dark-gray); */
+  /* transition: fill 0.3s ease-in-out; */
 }
 
 .delete-contact__btn:hover {
@@ -735,7 +738,8 @@ transform: rotate(180deg);
 }
 
 .delete-contact__btn:hover .delete-contact__icon {
-  fill: var(--burnt-sienna);
+  background-image: url(../img/delete.svg);
+  /* fill: var(--burnt-sienna); */
 }
 
 .delete-contact__btn:focus {
@@ -745,7 +749,8 @@ transform: rotate(180deg);
 }
 
 .delete-contact__btn:focus .delete-contact__icon {
-  fill: var(--burnt-sienna);
+  background-image: url(../img/delete.svg);
+  /* fill: var(--burnt-sienna); */
 }
 
 .modal-addcontact__btn {
