@@ -311,7 +311,6 @@
     showAllContacts(tbody);
 
     // Удаление клиента из таблицы
-    // deleteClientFromTable(tbody);
     const deleteClientBtns = tbody.querySelectorAll('.delete-btn');
     deleteClientBtns.forEach((e) => {
       e.addEventListener('click', async function(el) {
@@ -325,8 +324,7 @@
       });
     });
     
-    
-    // Изменить клиента 
+    // Изменить клиента из таблицы
     const changeClientBtns = tbody.querySelectorAll('.edit-btn');
     changeClientBtns.forEach((e) => {
       e.addEventListener('click', async function(el) {
@@ -514,9 +512,7 @@
     });
   };
 
-
-
-  // Удаление tbody таблицы чтобы её данные для отображения
+  // Удаление tbody таблицы и её данные для отображения
   function deleteTableRows() {
     const tbody = document.querySelector('tbody');
     while(tbody.rows.length > 0) {
@@ -617,10 +613,6 @@
 
   };
 
-
-  
-
-
   // ========= Отрисовка модального окна
   // Собираю модалку
   function createModalWindow(client, structure) {
@@ -636,7 +628,6 @@
   
     wrapper.append(btnWindowClose);
     
-    
     // Создал шапку модалки header элемент
     // ID передаём только в модалку по изменению данных клиента
     let idValue = null;
@@ -647,12 +638,12 @@
     const headerElement = createHeadOfModal(structure.headTitle(), idValue);
     wrapper.append(headerElement.header); //вставил шапку
     
-    // Создал форму
+    // Создал контейнер формы
     const formElement = document.createElement('form');
     formElement.classList.add('modal__form');
     formElement.setAttribute('action', '#');
 
-    // Создал структуру формы
+    // Создал части формы
     if (structure.type !== 'delete') {
       // Блок с ФИО клиента
       const clietntNameElement = createClientNameOfModal(client.lastName, client.name, client.surname);
@@ -673,7 +664,7 @@
       headerElement.headerTitle.classList.add('modal-header__heading-padding-top');
     };
 
-    // Блок кнопок
+    // Создал блок кнопок
     const btnsElement = createBtnsForModal(structure.btnSubmit(), structure.btn());
     wrapper.append(btnsElement.wrapperBtns);
     
@@ -719,7 +710,14 @@
         onClose(modal); // Закрываем модалку
         // Прорисовываем таблицу заново 
       };
-    }); 
+    });
+
+    // Для нового клиента раскрыть интупы
+    // Валидация инпутов ФИО
+    // Клик на кнопку добавить контакт. Деактивировать кнопку если десять контактов в функции createClientContactsOfModal
+    // Форматирование и валидация инпутов контактов
+    // Клик на кнопку удалить контакт
+    // Селект для контактов
 
 
     return modal;
@@ -750,9 +748,8 @@
     };
   };
 
-  // Часть формы с ФИО клиента
+  // Создал часть формы с ФИО клиента
   function createClientNameOfModal(lastName, name, surname) {
-    // console.log(lastName, name, surname);
     const fieldsetClientName = document.createElement('fieldset');
     const wrapperClientName = document.createElement('div');
     const lableLastname = document.createElement('lable');
@@ -798,7 +795,6 @@
     asterixName.textContent = '*';     
     lableSurname.textContent = 'Отчество';
 
-
     if (lastName + name + surname) {
       inputLastname.classList.remove('blocked');
       inputName.classList.remove('blocked');
@@ -807,8 +803,6 @@
       inputName.value = name;
       inputSurname.value = surname;
     };
-
-
 
     lableLastname.append(asterixLastname);
     lableName.append(asterixName);
@@ -824,10 +818,8 @@
     return fieldsetClientName;
   }
 
-
-  // Часть формы контактов клиента
+  // Создал часть формы с контактами клиента
   function createClientContactsOfModal(contacts) {
-    // console.log(contacts);
     const fieldsetContacts = document.createElement('fieldset');
     const wrapperContacts = document.createElement('div');
     const listOfContacts = document.createElement('ul');
@@ -849,6 +841,9 @@
 
     // Кнопка добавить клиента    
     const btnAddContactElement = createBtnAddContactForModal();
+    if (contacts.length === 10) {
+      btnAddContactElement.disabled = true;
+    }
     fieldsetContacts.append(wrapperContacts);
     fieldsetContacts.append(btnAddContactElement);
 
@@ -955,6 +950,7 @@
     };
   };
 
+  // Создал блок кнопок модалки
   function createBtnsForModal(submitTitle, smallTitle) {
     const wrapperBtns = document.createElement('div');
     const btnSubmit = document.createElement('button');
@@ -1016,7 +1012,6 @@
     // console.log(data);
     return data;
   };
-  // fetchSearchClients('Льев');
 
   // Добавляем клиента в базу
   async function fetchAddClient(obj) {
@@ -1059,16 +1054,13 @@
       }),
     });
   };
-  // fetchAddClient();
 
   // Получаем клиента по его ID
   async function fetchGetClientById(id) {
     const pesponse = await fetch(`${URI}/${id}`);
     const data = await pesponse.json();
-    // console.log(data);
     return data;
   };
-  // fetchGetClientById('1619590335813');
 
   // Обновляем данные клиента по ID
   async function fetchUpdateClient(id) {
@@ -1085,10 +1077,8 @@
       })
     });
     const data = await response.json();
-    console.log(data);
     return data;
   };
-  // fetchUpdateClient('1619595050787');
 
   // Удаляем клиента по ID. Ничего не возвращает в body
   async function fetchDeleteClient(id) {
@@ -1096,20 +1086,11 @@
       method: "DELETE",
     });
     const data = await response.json();
-    // console.log(data);
   };
-  // fetchDeleteClient('1619595050787');
-
-
-  
-  
-  
- 
 
   async function updateClientsInTable() {
     // Заблокировал инпут поиска клиентов 
     const serchInput = document.querySelector('.search-form__input');
-    // console.log(serchInput);
     serchInput.disabled = true; 
 
     // Показал оверлей
@@ -1120,7 +1101,7 @@
     clientsState.clients = await fetchGetClients();
 
     // Вставил данные в таблицу
-    const insertClientsDataElement = insertClientsData(clientsState);
+    insertClientsData(clientsState);
     
     // Скрыл оверлей
     tableBodyOverley.classList.add('blocked'); //TODO animation
@@ -1175,24 +1156,10 @@
       sortDataInTable(clientsState, tableHead.tr);
       
       // Добавляем клиента
-      // addBtn.btn.addEventListener('click', function() {
-        
-      // });
-
-
-      const client = {
-        lastName: "Прошоченко",
-        name: 'Егор',
-        surname: 'Фокович',
-        contacts: [{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'},{type:'Телефон',value:'+71234567892'}],
-        // contacts: null,
-        id : '1624008199987',
-        // updatedAt: ''
-        // createdAt: ''
-      };
-      // Формируем модальное окно
-      // Вызываем модалку
-      // createModalWindow(client, structure);
+      addBtn.btn.addEventListener('click', function(e) {
+        structure.type = 'new';
+        createModalWindow('', structure);
+      });
 
     };
     
