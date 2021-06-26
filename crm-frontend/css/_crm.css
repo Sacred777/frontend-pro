@@ -626,12 +626,14 @@ transform: rotate(180deg);
   padding: 0 12px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 100%;
+  width: 123px;
   cursor: pointer;
 }
 
 .contact-type__title {
-  margin-right: 40px;
+  /* margin-right: 40px; */
   font-size: 12px;
   line-height: 16px;
   color: var(--night-rider);
@@ -640,7 +642,10 @@ transform: rotate(180deg);
 .contact-type__icon {
   height: 12px;
   width: 12px;
-  fill: var(--light-slate-blue);
+  /* fill: var(--light-slate-blue); */
+  background-image: url(../img/arrow_up.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 /* Выпадающий список */

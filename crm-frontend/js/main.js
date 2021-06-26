@@ -1,6 +1,41 @@
 (() => {
 
-   // Создаем Header
+  const DELAY_TIME = 300; //300 мс установлено тех. заданием
+
+  // Объект состояния клиентов (сортировка, массив объектов клиентов)
+  const clientsState = {
+    columnOfSort: 'id', // По умолчанию по тех.заданию
+    stateOfSort: {
+      id: true,
+      fullname: false,
+      createdAt: false,
+      updatedAt: false,
+    },
+    clients: [],
+  };
+
+  // Массив типов контактов
+  const contactsType = ['Телефон','Facebook','VK','Email','Другое'];
+
+  // Объект структуры модального окна  
+  const structure = {
+    type: 'new', // Может принимать значения delete, new, change
+
+    headTitle: function() {
+      return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
+    },
+
+    btnSubmit: function() {
+      return (this.type === 'delete') ? 'Удалить' : 'Сохранить'
+    },
+
+    btn: function() {
+      return (this.type === 'change') ? 'Удалить клиента' : 'Отмена'
+    },
+  };
+
+  // ======== Отрисовка таблицы
+  // Создаем Header
   function createHeader() {
     const header = document.createElement('header');
     const logo = document.createElement('a');
@@ -272,6 +307,42 @@
       tbody.append(tr);
     });
 
+    // Разворот комбинированных контактов
+    showAllContacts(tbody);
+
+    // Удаление клиента из таблицы
+    // deleteClientFromTable(tbody);
+    const deleteClientBtns = tbody.querySelectorAll('.delete-btn');
+    deleteClientBtns.forEach((e) => {
+      e.addEventListener('click', async function(el) {
+        const clientId = this.dataset.id;
+        // Установил тип окна для модалки 
+        structure.type = 'delete';
+        // получил данные из базы о клиенте с id
+        const client = await fetchGetClientById(this.dataset.id);
+        // Вызвал модалку
+        createModalWindow(client, structure);
+      });
+    });
+    
+    
+    // Изменить клиента 
+    const changeClientBtns = tbody.querySelectorAll('.edit-btn');
+    changeClientBtns.forEach((e) => {
+      e.addEventListener('click', async function(el) {
+        const clientId = this.dataset.id;
+        // Установил тип окна для модалки 
+        structure.type = 'change';
+        // получил данные из базы о клиенте с id
+        const client = await fetchGetClientById(this.dataset.id);
+        // Вызвал модалку
+        createModalWindow(client, structure);
+      });
+    });
+    
+
+
+
     return tbody;
   };
   
@@ -329,7 +400,7 @@
     return ul;
   };
 
-  // Функция создает li элемент для списка контактов
+  // Функция создает li элемент для иконок списка контактов
   function createContactElement(contact, visible) {
     const li = document.createElement('li');
     const img = document.createElement('img');
@@ -375,6 +446,7 @@
     return li;
   };
 
+  // ======= Функции активностей в таблице
   // Сортировка данных в таблице в первом аргументе объект, во втоом tableHead.tr
   function sortDataInTable(clientsState, tableHeadElement) {
     const thElements = tableHeadElement.querySelectorAll('.table__column_sort');
@@ -386,7 +458,7 @@
           } else {
             clientsState.stateOfSort[e.id] = true;
           };
-          insertClientsData(clientsState);  
+          insertClientsData(clientsState);
       })
     })  
   }
@@ -442,39 +514,7 @@
     });
   };
 
-  // Функция удаления клиента из таблицы
-  function deleteClient(tableBodyElement) {
-    //собираем массив кнопок по delete-btn
-    const btns = tableBodyElement.querySelectorAll('.delete-btn');
-    btns.forEach((e) => {
-      e.addEventListener('click', async function(el) {
-          console.log(this.dataset.id);
 
-          // TODO нужен Тип окна для стилей. Объект для модалки 
-          const modalObj = {
-            headTitle: 'Удалить клиента',
-            errorText: 'Вы действительно хотите удалить данного клиента?',
-            btnSubmit: 'Удалить',
-            btn: 'Отмена ',
-          };
-
-          // получаем данные из базы о клиенте с id
-          const client = await fetchGetClientById(this.dataset.id);
-
-          console.log(modalObj);
-          console.log(client);
-
-          createModalWindow(client, modalObj);
-
-      });
-    });
-    // вешаем обработчик на клик
-    // если кликаем, модальное окно с подтверждением удаления
-    // если подтверждаем удаление берем data-id и вызываем функцию удаления клиента
-    // после этого получаем данные клиентов из базы и прорисовываем таблицу
-
-
-  }
 
   // Удаление tbody таблицы чтобы её данные для отображения
   function deleteTableRows() {
@@ -542,10 +582,11 @@
   };
 
   // Показываю все контакты клинета по нажатию на Comb кнопку
-  function showAllContacts(tableBodyElement) {
-    const combElement = tableBodyElement.querySelectorAll('#comb');
+  function showAllContacts(tbodyElement) {
+    const combElement = tbodyElement.querySelectorAll('#comb');
     combElement.forEach((e) => {
       e.addEventListener('click', function() {
+        console.log('Клик на ', e);
         const contactsElement = e.parentNode.querySelectorAll('.contacts__item');
         contactsElement.forEach((el) => {
          if (el.id) {
@@ -558,12 +599,32 @@
     });
   }
 
-  // Создаем модалку
-  function createModalWindow(client, structure) {
-    // console.log(client);
-    // console.log(structure);
+  // TODO animation Закрываю модалку
+  function onClose(element) {
+    element.remove();
+  };
 
-    // Создает контейнер
+  // Удаляю клиента
+  async function onDelete(clientId) {
+    // Удаляю из базы
+    await fetchDeleteClient(clientId);
+    // Получаю данные из базы и обновляю таблицу
+    await updateClientsInTable();
+  };
+
+  // Сохраняю данные клиента
+  function onSave() {
+
+  };
+
+
+  
+
+
+  // ========= Отрисовка модального окна
+  // Собираю модалку
+  function createModalWindow(client, structure) {
+    // Создал контейнер
     const modal = document.createElement('div');
     const wrapper = document.createElement('div');
     const btnWindowClose = document.createElement('span');
@@ -575,169 +636,91 @@
   
     wrapper.append(btnWindowClose);
     
-    // ID передаём только в модалке по изменению данных клиента
+    
+    // Создал шапку модалки header элемент
+    // ID передаём только в модалку по изменению данных клиента
     let idValue = null;
-    if (structure.type === 'change') {
+    if (structure.type !== 'new') {
       idValue = client.id; 
-    }
-    
-    // Получил шапку модалки header элемент
+    };
+
     const headerElement = createHeadOfModal(structure.headTitle(), idValue);
-    wrapper.append(headerElement); //вставил шапку
+    wrapper.append(headerElement.header); //вставил шапку
     
-     
     // Создал форму
     const formElement = document.createElement('form');
     formElement.classList.add('modal__form');
     formElement.setAttribute('action', '#');
 
-    // form.append(fieldsetClientName);
-    // form.append(fieldsetContacts);
-    // form.append(wrapperError);
-    // form.append(wrapperBtns);
-
-
+    // Создал структуру формы
     if (structure.type !== 'delete') {
       // Блок с ФИО клиента
       const clietntNameElement = createClientNameOfModal(client.lastName, client.name, client.surname);
       formElement.append(clietntNameElement);
-      
+      // Блок с контактами клиента
       const clientContactsElement = createClientContactsOfModal(client.contacts);
-      
-      // Блок с контактами и кнопкой "Добавить клиента"
+      // К блоку с контактами добавил кнопку "Добавить клиента"
       formElement.append(clientContactsElement.fieldsetContacts);
       wrapper.append(formElement);  
     } else {
+      // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
       const errorElement = createErrorForModal ('Вы действительно хотите удалить данного клиента?');
-      wrapper.append(errorElement);
+      // Меняем цвет блока ошибок
+      errorElement.spanError.classList.add('modal-error__text-style');
+      wrapper.append(errorElement.wrapperError);
+      // Выравнивание заголовка шапки посредине
+      headerElement.header.classList.add('align-center', 'modal-header-margin-bottom');
+      headerElement.headerTitle.classList.add('modal-header__heading-padding-top');
     };
 
     // Блок кнопок
     const btnsElement = createBtnsForModal(structure.btnSubmit(), structure.btn());
     wrapper.append(btnsElement.wrapperBtns);
-
-    
-    ;  
-      
-        
-    
-    if (structure.fieldsats) {
-      // const fieldsetClientName = document.createElement('fieldset');
-      // const wrapperClientName = document.createElement('div');
-      // const lableLastname = document.createElement('lable');
-      // const asterixLastname = document.createElement('span');
-      // const inputLastname = document.createElement('input');
-      // const lableName = document.createElement('lable');
-      // const asterixName = document.createElement('span');
-      // const inputName = document.createElement('input');
-      // const lableSurname = document.createElement('lable');
-      // const inputSurname = document.createElement('input');
-      // const fieldsetContacts = document.createElement('fieldset');
-      // const wrapperContacts = document.createElement('div');
-      // const listOfContacts = document.createElement('ul');
-      // const btnAddContact = document.createElement('button');
-      // const btnAddContactIcon = document.createElement('span');
-      // const btnAddContactTitle = document.createElement('span');
-
-      // fieldsetClientName.classList.add('fieldset_reset');
-      // wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
-      // lableLastname.classList.add('modal__lable');
-      // asterixLastname.classList.add('lable_asterix');
-      // inputLastname.classList.add('input', 'modal__intup', 'blocked');
-      // lableName.classList.add('modal__lable');
-      // asterixName.classList.add('lable_asterix');
-      // inputName.classList.add('input', 'modal__intup', 'blocked');    
-      // lableSurname.classList.add('modal__lable');
-      // inputSurname.classList.add('input', 'modal__intup', 'blocked');    
-      // fieldsetContacts.classList.add('modal-contacts', 'fieldset_reset');
-      // wrapperContacts.classList.add('modal__container');
-      // listOfContacts.classList.add('modal-contacts__list');
-      // btnAddContact.classList.add('modal-addcontact__btn', 'btn');
-      // btnAddContactIcon.classList.add('modal-addcontact__icon');
-      // btnAddContactTitle.classList.add('modal-addcontact__title');
-      
-      // lableLastname.setAttribute('for', 'lastname');
-      // inputLastname.setAttribute('id', 'lastname');
-      // inputLastname.setAttribute('data-input', 'lastname');
-      // inputLastname.setAttribute('type', 'text');
-      // inputLastname.setAttribute('name', 'lastname');
-      // inputLastname.setAttribute('autofocus', 'true');
-      // lableName.setAttribute('for', 'name');
-      // inputName.setAttribute('id', 'name');
-      // inputName.setAttribute('data-input', 'name');
-      // inputName.setAttribute('type', 'text');
-      // inputName.setAttribute('name', 'name');
-      // lableSurname.setAttribute('for', 'surname');
-      // inputSurname.setAttribute('id', 'surname');
-      // inputSurname.setAttribute('data-input', 'surname');
-      // inputSurname.setAttribute('type', 'text');
-      // inputSurname.setAttribute('name', 'surname');
-      // btnAddContact.setAttribute('data-btn','contact-add');
-
-      // lableLastname.innerText = 'Фамилия';
-      // asterixLastname.innerText = '*';
-      // lableName.innerText = 'Имя';
-      // asterixName.innerText = '*';     
-      // lableSurname.innerText = 'Отчество';
-      // btnAddContactTitle.innerText = 'Добавить контакт';
-
-      // if (client) {
-      //   console.log(client);
-      //   inputLastname.classList.remove('blocked');
-      //   inputName.classList.remove('blocked');
-      //   inputSurname.classList.remove('blocked');
-      //   inputLastname.value = client.lastName;
-      //   inputName.value = client.name;
-      //   inputSurname.value = client.surname;
-        
-      //   if (client.contacts) {
-      //     console.log(client.contacts);
-      //     client.contacts.forEach((el) => {
-      //       const contactItem = createContactForModal(el);
-      //       listOfContacts.append(contactItem);
-      //       console.log(contactItem);
-      //     });
-      //   };
-
-      // };
-
-      // if (structure.errorText) {
-      //   spanError.innerText = structure.errorText;
-      //   wrapperError.classList.remove('blocked');
-      // }
-
-      // lableLastname.append(asterixLastname);
-      // lableName.append(asterixName);
-      
-      // wrapperClientName.append(lableLastname);
-      // wrapperClientName.append(inputLastname);
-      // wrapperClientName.append(lableName);
-      // wrapperClientName.append(inputName);
-      // wrapperClientName.append(lableSurname);
-      // wrapperClientName.append(inputSurname);
-      // fieldsetClientName.append(wrapperClientName);
-
-      // wrapperContacts.append(listOfContacts);
-      // btnAddContact.append(btnAddContactIcon);
-      // btnAddContact.append(btnAddContactTitle);
-      // wrapperContacts.append(btnAddContact);
-      // fieldsetContacts.append(wrapperContacts);
-
-      // wrapperError.append(spanError);
-
-      // btnSubmit.append(btnSubmitIcon);
-      // btnSubmit.append(btnSubmitTitle);
-      // wrapperBtns.append(btnSubmit);
-      // wrapperBtns.append(btnSmall);
-
-      // form.append(fieldsetClientName);
-      // form.append(fieldsetContacts);
-      // form.append(wrapperError);
-      // form.append(wrapperBtns);
-    }  
     
     modal.append(wrapper);
     document.body.append(modal);
+
+    // Обработчики событий
+    // Клик на иконку закрытия окна
+    btnWindowClose.addEventListener('click', function(e) {
+      console.log(e);
+      onClose(modal);
+    });
+
+    // Клик на оверлей
+    modal.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('modal')) {
+        return;
+      }
+      onClose(modal);
+    });
+
+    // Клик на большую кнопку
+    btnsElement.btnSubmit.addEventListener('click', function(e) {
+      if (structure.type == 'delete') {
+
+        onDelete(idValue); // Удаляем клиента из базы по ID
+        onClose(modal); // Закрываем модалку
+        // Прорисовываем таблицу заново 
+      } else {
+        onSave(clientObjForSaving);
+        onClose(modal); // Закрываем модалку
+        // Прорисовываем таблицу заново 
+      };
+      
+    });
+
+    // Клик на маленькую кнопку
+    btnsElement.btnSmall.addEventListener('click', function(e) {
+      if (structure.type !== 'change') {
+        onClose(modal);
+      } else {
+        onDelete(idValue); // Удаляем клиента из базы по ID
+        onClose(modal); // Закрываем модалку
+        // Прорисовываем таблицу заново 
+      };
+    }); 
+
 
     return modal;
   };
@@ -761,8 +744,11 @@
       header.append(headerInfo);
     }
 
-    return header;
-  }
+    return {
+      header,
+      headerTitle,
+    };
+  };
 
   // Часть формы с ФИО клиента
   function createClientNameOfModal(lastName, name, surname) {
@@ -901,6 +887,7 @@
     btnContactTypeTitle.textContent = 'Тип контакта';
 
     contactsType.forEach((e) => {
+      // console.log(e);
       const item = document.createElement('li');
       item.classList.add('contact-type__item');
       item.textContent = e;
@@ -962,8 +949,11 @@
 
     wrapperError.append(spanError);
     
-    return wrapperError;
-  }
+    return {
+      wrapperError,
+      spanError,
+    };
+  };
 
   function createBtnsForModal(submitTitle, smallTitle) {
     const wrapperBtns = document.createElement('div');
@@ -978,6 +968,10 @@
     btnSubmitTitle.classList.add('submit-btn__title');
 
     btnSmall.classList.add('modal-delete-btn', 'btn');
+
+    btnSubmit.setAttribute('data-btn', 'submit');
+    btnSmall.setAttribute('data-btn', 'small');
+
 
     btnSubmitTitle.textContent = submitTitle;
     btnSmall.textContent = smallTitle;    
@@ -1109,68 +1103,53 @@
 
   
   
-  // Массив типов контактов
-  const contactsType = ['Телефон','Facebook','VK','Email','Другое'];
   
-  // Объект структуры модального окна  
-  const structure = {
-    type: 'new', // Может принимать значения delete, new, change
+ 
 
-    headTitle: function() {
-      return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
-    },
+  async function updateClientsInTable() {
+    // Заблокировал инпут поиска клиентов 
+    const serchInput = document.querySelector('.search-form__input');
+    // console.log(serchInput);
+    serchInput.disabled = true; 
 
-    btnSubmit: function() {
-      return (this.type === 'delete') ? 'Удалить' : 'Сохранить'
-    },
+    // Показал оверлей
+    const tableBodyOverley = document.querySelector('.table-body__overlay');
+    tableBodyOverley.classList.remove('blocked'); //TODO animation
 
-    btn: function() {
-      return (this.type === 'change') ? 'Удалить клиента' : 'Отмена'
-    },
+    // Записал данные о клинетах из базы в массив объекта
+    clientsState.clients = await fetchGetClients();
+
+    // Вставил данные в таблицу
+    const insertClientsDataElement = insertClientsData(clientsState);
+    
+    // Скрыл оверлей
+    tableBodyOverley.classList.add('blocked'); //TODO animation
+
+    // Разблокировал инпут поиска клиентов
+    serchInput.disabled = false; 
   };
-
 
   // Основная функция
   document.addEventListener('DOMContentLoaded', () => {
     async function createApp() {
-      // Объект состояния клиентов (сортировка, массив объектов клиентов)
-      const clientsState = {
-        // field: 'id',
-        columnOfSort: 'id',
-        stateOfSort: {
-          id: true,
-          fullname: false,
-          createdAt: false,
-          updatedAt: false,
-        },
-        clients: [],
-      };
-
       const container = document.getElementById('crm-app');
       const header = createHeader(); //Создаю шапку сайта с лого и поиском
       const tableHead = createTableHead(); //Создаю шапку таблицы
       const tableBody = createTableBody(); //Создаю тело таблицы для вставки данных о клиентах
       const addBtn = createAddClientBtn(); //TODO кнопку встроить после получения данных о клиентах  Создаю кнопку "Добавить клиента"
-
-
       
       container.append(header.header); //Добавил шапку сайта в контейнер сайта
       container.append(tableHead.main); //Добавил шапку таблицы в контейнер сайта
       tableHead.tableBox.append(tableBody.tableBody); //Добавил в шапку таблицы тело таблицы
       tableHead.main.append(addBtn.wrapper); //Добвил в секцию main кнопку "Довавить клиента"
 
-      header.input.disabled = true; //Деактивировал инпут поиска клиентов
-      tableBody.overlay.classList.remove('blocked'); //TODO анимация. Показываю оверлей
-      clientsState.clients = await fetchGetClients(); //Записал массив объектов клиентов в объект состояния
-      const insertClientsDataElement = insertClientsData(clientsState); //TODO не знаю нужна ли здесь переменная. Вставил клиентские данные в таблицу с учетом сортировки  
+      // Вставил данные из базы в таблицу
+      await updateClientsInTable();
 
-      tableBody.overlay.classList.add('blocked'); //TODO анимация скрыл оверлей
-      header.input.disabled = false; //Снял блокировку с input поиска
-
-      showTooltips(); // Показываю тултипы
+      // Показываю тултипы
+      showTooltips(); 
       
-      //вешаю событие на input c задержкой времени
-      const DELAY_TIME = 300; //300 мс установлено тех. заданием
+      // Поиск по ФИО
       let timeoutId = null;
       header.input.addEventListener('input', () => {
         clearTimeout(timeoutId);
@@ -1194,17 +1173,13 @@
 
       // Сортировка данных в таблице 
       sortDataInTable(clientsState, tableHead.tr);
+      
+      // Добавляем клиента
+      // addBtn.btn.addEventListener('click', function() {
+        
+      // });
 
-      // Показываю скомбинированные контакты
-      showAllContacts(tableBody.tableBody);
-      
-      // Удаляем клиента из таблицы
-      deleteClient(tableBody.tableBody);
-            
-      
-      // Модалка
-      // createModalWindow(client, structure)
-      // Формируем клиента
+
       const client = {
         lastName: "Прошоченко",
         name: 'Егор',
@@ -1217,7 +1192,7 @@
       };
       // Формируем модальное окно
       // Вызываем модалку
-      createModalWindow(client, structure);
+      // createModalWindow(client, structure);
 
     };
     
