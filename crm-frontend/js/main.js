@@ -670,7 +670,6 @@
       formElement.append(clietntNameElement);
       // Блок с контактами клиента
       const clientContactsElement = createClientContactsOfModal(client.contacts);
-      // К блоку с контактами добавил кнопку "Добавить клиента"
       formElement.append(clientContactsElement.fieldsetContacts);
       wrapper.append(formElement);
 
@@ -688,9 +687,6 @@
         });
       });
 
-      // Показываем dropdown по клику на кнопке
-
-
       const btnsTypeOfContactsList = clientContactsElement.fieldsetContacts.querySelectorAll('.contact-type__button btn');
       btnsTypeOfContactsList.forEach((e) => {
         e.addEventListener('click', function(el) {
@@ -698,6 +694,9 @@
           console.log(el.this);
         });
       });
+
+      // Добавляем контакт клиента
+      addNewContact(clientContactsElement.btnAddContactElement, clientContactsElement.wrapperContacts);
 
     } else {
       // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
@@ -772,7 +771,12 @@
 
     // Для нового клиента раскрыть инпуты
     // Валидация инпутов ФИО
+
     // Клик на кнопку добавить контакт.Деактивировать кнопку если десять контактов в функции createClientContactsOfModal
+    // console.log(clientContactsElement.btnAddContactElement);
+    // addNewContact(clientContactsElement.btnAddContactElement);
+
+
     // Форматирование и валидация инпутов контактов
     // Клик на кнопку удалить контакт
     // Селект для контактов
@@ -929,11 +933,9 @@
     wrapperContacts.append(listOfContacts);
         
     if (contacts) {
-      // console.log(client.contacts);
       contacts.forEach((el) => {
         const contactItem = createContactForModal(el);
         listOfContacts.append(contactItem);
-        // console.log(contactItem);
       });
     };
 
@@ -945,6 +947,7 @@
     return {
       fieldsetContacts,
       btnAddContactElement,
+      wrapperContacts,
     };    
   };
 
@@ -953,10 +956,7 @@
     const contactItem = document.createElement('li');
     const wrapContactType = document.createElement('div');
     const btnContactType = document.createElement('button');
-    const btnContactTypeTitle = document.createElement('span');
-    const btnContactTypeIcon = document.createElement('span');
-    const wrapContactTypeDropdown = document.createElement('div');
-    const wrapContactTypeDropdownList = document.createElement('ul');
+    const listContactTypeDropdown = document.createElement('ul');
     const inputContactValue = document.createElement('input');
     const btnContactDelete = document.createElement('button');
     const btnContactDeleteIcon = document.createElement('span');
@@ -964,50 +964,41 @@
     contactItem.classList.add('modal-contacts__item');
     wrapContactType.classList.add('contacts-type');
     btnContactType.classList.add('contact-type__button', 'btn');
-    btnContactTypeTitle.classList.add('contact-type__title');
-    btnContactTypeIcon.classList.add('contact-type__icon');
-    wrapContactTypeDropdown.classList.add('contact-type__dropdown', 'blocked');
-    wrapContactTypeDropdownList.classList.add('contact-type__list');
+    listContactTypeDropdown.classList.add('contact-type__list');
     inputContactValue.classList.add('input', 'contact-value', 'contact-value_border-right');
     inputContactValue.setAttribute('type', 'text');
     inputContactValue.setAttribute('placeholder', 'Введите данные контакта');
     btnContactDelete.classList.add('delete-contact__btn', 'btn', 'blocked');
     btnContactDeleteIcon.classList.add('delete-contact__icon');
 
-    btnContactTypeTitle.textContent = 'Тип контакта';
+    btnContactType.textContent = 'Тип контакта';
 
     contactsType.forEach((e) => {
-      // console.log(e);
       const item = document.createElement('li');
       item.classList.add('contact-type__item');
       item.textContent = e;
-      wrapContactTypeDropdownList.append(item);
+      listContactTypeDropdown.append(item);
     })
 
     if (contact) {
-      btnContactTypeTitle.textContent = contact.type;
+      btnContactType.textContent = contact.type;
       inputContactValue.value = contact.value;
       btnContactDelete.classList.remove('blocked');
 
-      // Удаляю контакт клиента
-      btnContactDelete.addEventListener('click', function() {
-        contactItem.remove();
-      });
+      // // Удаляю контакт клиента
+      // btnContactDelete.addEventListener('click', function() {
+      //   contactItem.remove();
+      // });
     };
 
-    btnContactType.append(btnContactTypeTitle);
-    btnContactType.append(btnContactTypeIcon);
-    
-    wrapContactTypeDropdown.append(wrapContactTypeDropdownList);
-    
     wrapContactType.append(btnContactType);
-    wrapContactType.append(wrapContactTypeDropdown);
+    wrapContactType.append(listContactTypeDropdown);
 
     btnContactDelete.append(btnContactDeleteIcon);
 
     contactItem.append(wrapContactType);
     contactItem.append(inputContactValue);
-    contactItem.append(btnContactDelete);    
+    contactItem.append(btnContactDelete);
 
     return contactItem;
   };
@@ -1099,39 +1090,74 @@
     };
   };
 
-  //TODO пробую развернуть дропдаун
+  //Развернул дропдаун
   function showDropDown(modalElement) {
-    // .addEventListener('click', function() {
+    const dropdowns = modalElement.querySelectorAll('.contacts-type');
 
-    // })
-    const listItems = document.querySelectorAll('.contacts-type');
-    // console.log(listItems);
-    listItems.forEach((e) => {
-      const btnItem = e.querySelector('.contact-type__button');    
-      const dropdownList = e.querySelector('.contact-type__dropdown');
-      // console.log(btnItem);
-      // console.log(dropdownItem);
-      btnItem.addEventListener('click', function() {
-        dropdownList.classList.toggle('blocked');
-        const btnItemTitle = btnItem.querySelector('.contact-type__title');
-        const dropdownItems = dropdownList.querySelectorAll('.contact-type__item');
-        dropdownItems.forEach((item) => {
-          item.addEventListener('click', function() {
-            if (this.classList.contains('.contact-type__item')) {
-              btnItemTitle.textContent = this.innerText;
-              // dropdownList.classList.add('blocked');
-            }
-            console.log(this);
-            // console.log(this.innerText);
-            // btnItem.innerText = 'Пипец';
-            dropdownList.classList.add('blocked');
-          });
-        });
-
-
+    dropdowns.forEach((e) => {
+      const btnDropdown = e.querySelector('.contact-type__button');
+      const listDropdown = e.querySelector('.contact-type__list');
+      const itemDropdown = listDropdown.querySelectorAll('.contact-type__item');
+      // const inputDropdown = e.querySelector('.dropdown__input');
+    
+    // Отслеживаем клик на кнопке (открыть/закрыть список)
+      btnDropdown.addEventListener('click', function(){
+        listDropdown.classList.toggle('contact-type__list_visible');
+        btnDropdown.classList.toggle('contact-type__button_rotate');
+        // btnDropdown.classList.add('dropdown__button_active');
       });
-    });
+    
+    // Отслеживаем клик по элементам списка и присваивание значения кнопке
+      itemDropdown.forEach((e) => {
+        e.addEventListener('click', function(el) {
+          // el.stopPropagation();
+          btnDropdown.textContent = this.innerText;
+          btnDropdown.focus();
+          // inputDropdown.value = this.dataset.value;
+          hidenDropdown(listDropdown, btnDropdown);
+          // listDropdown.classList.remove('contact-type__list_visible');
+          // btnDropdown.classList.remove('contact-type__button_rotate');
+   
+        }); 
+      });
+    
+    // Клик снаружи дропдауна. Закрыть дропдаун
+      document.addEventListener('click', function(e) {
+        if (e.target !== btnDropdown) {
+          // btnDropdown.classList.remove('dropdown__button_active');
+          hidenDropdown(listDropdown, btnDropdown);
+          // listDropdown.classList.remove('contact-type__list_visible');
+          // btnDropdown.classList.remove('contact-type__button_rotate');
+        };  
+      });
+    
+    // Нажатие на Таб или Эскейп. Закрыть дропдаун
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab' || e.key === 'Escape') {
+          // btnDropdown.classList.remove('dropdown__button_active');
+          hidenDropdown(listDropdown, btnDropdown);
+          // listDropdown.classList.remove('contact-type__list_visible');
+          // btnDropdown.classList.remove('contact-type__button_rotate');
+        };
+      });
+    });   
+  };
 
+  // В фнункции showDropDown повторение кода - удаление свойст показа списка дропдауна
+  function hidenDropdown(list, button) {
+    list.classList.remove('contact-type__list_visible');
+    button.classList.remove('contact-type__button_rotate');
+  };
+
+  function addNewContact(btnAddContact, wrapperContacts) {
+    console.log(wrapperContacts);
+    btnAddContact.addEventListener('click', function() {
+      console.log('Нажал на кнопку');
+      const contactItem = createContactForModal('');
+      console.log(contactItem);
+      wrapperContacts.append(contactItem);
+      showDropDown(wrapperContacts);
+    });
   };
 
   // ============================

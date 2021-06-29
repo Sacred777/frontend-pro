@@ -647,55 +647,104 @@ transform: rotate(180deg);
 
 .contacts-type {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--white-lilac);
-  border: 1px solid #C8C5D1;
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* background-color: var(--white-lilac); */
+  /* border: 1px solid #C8C5D1; */
 }
 
 .contact-type__button {
+  position: relative;
   padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
   width: 123px;
+  text-align: left;
+  display: block;
+  /* background: var(--ghost); */
+  background-color: var(--white-lilac);
+  border: 1px solid var(--ghost);
+
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--night-rider);
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: space-between; */
+  height: 38px;
   cursor: pointer;
+}
+
+.contact-type__button::after {
+  --tringle-size: 7px;
+  content: "";
+  position: absolute;
+  display: block;
+  width: var(--tringle-size);
+  height: var(--tringle-size);
+  /* top: calc(50% - var(--tringle-size)); */
+  top: 50%;
+  right: 15px;
+  border-width: 0 0 2px 2px;
+  border-color: #9873FF;
+  border-style: solid;
+  transform: translateY(-50%) rotate(-45deg); /* Вместе с top: 50% вырвнивает по вертикали */
+  pointer-events: none;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Чтобы перевернуть псевдоэлемент присвоить класс .contact-type__button_rotate*/
+.contact-type__button_rotate::after {
+  transform: translateY(-50%) rotate(135deg);
 }
 
 .contact-type__title {
   /* margin-right: 40px; */
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--night-rider);
+  /* font-size: 12px; */
+  /* line-height: 16px; */
+  /* color: var(--night-rider); */
 }
 
 .contact-type__icon {
-  height: 12px;
-  width: 12px;
+  /* height: 12px; */
+  /* width: 12px; */
   /* fill: var(--light-slate-blue); */
-  background-image: url(../img/arrow_up.svg);
-  background-repeat: no-repeat;
-  background-size: contain;
+  /* background-image: url(../img/arrow_up.svg); */
+  /* background-repeat: no-repeat; */
+  /* background-size: contain; */
 }
 
 /* Выпадающий список */
 .contact-type__dropdown {
   /* display: none; */
-  position: absolute;
-  top: 37px;
-  right: -1px;
-  left: -1px;
-  z-index: 1000;
-  border: 1px solid var(--ghost);
-  border-top: 0;
-  background: var(--magnolia);
+  /* position: absolute; */
+  /* top: 37px; */
+  /* right: -1px; */
+  /* left: -1px; */
+  /* z-index: 1000; */
+  /* border: 1px solid var(--ghost); */
+  /* border-top: 0; */
+  /* background: var(--magnolia); */
 }
 
 .contact-type__list {
+  display: none;
+  position: absolute;
+  top: 37px;
+  left: 0;
+  /* right: -1px; */
+  /* left: -1px; */
+  z-index: 1000;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ghost);
+  /* border-top: 0; */
+  background-color: var(--magnolia);
   list-style: none;
-  background: var(--magnolia);
+  /* background: var(--magnolia); */
+}
+
+.contact-type__list_visible {
+  display: block;
 }
 
 .contact-type__item {
@@ -706,7 +755,7 @@ transform: rotate(180deg);
 }
 
 .contact-type__item:hover {
-  background: var(--white-lilac);
+  background-color: var(--white-lilac);
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
 }
@@ -745,7 +794,7 @@ transform: rotate(180deg);
 }
 
 .delete-contact__btn {
-  /* display: none; */
+  display: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -754,9 +803,9 @@ transform: rotate(180deg);
   background-color: var(--white-lilac);
   border-radius: 0;
   border: 1px solid var(--ghost);
+  border-left: transparent;
   transition: border 0.3s ease-in-out;
 }
-
 
 .delete-contact__icon {
   display: block;
@@ -771,6 +820,7 @@ transform: rotate(180deg);
 
 .delete-contact__btn:hover {
   border: none;
+  /* outline: 1px solid var(--burnt-sienna);  */
   border: 1px solid var(--burnt-sienna);
 }
 
