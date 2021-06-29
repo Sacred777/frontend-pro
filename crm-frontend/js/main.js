@@ -1,6 +1,7 @@
 (() => {
 
   const DELAY_TIME = 300; //300 мс установлено тех. заданием
+  const VISIBLE_CSS = 'visible';
 
   // Объект состояния клиентов (сортировка, массив объектов клиентов)
   const clientsState = {
@@ -22,15 +23,28 @@
     type: 'new', // Может принимать значения delete, new, change
 
     headTitle: function() {
-      return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
+      let title = null;
+      switch (this.type) {
+        case 'delete':
+          title = 'Удалить клиента';
+          break;
+        case 'new':
+          title = 'Новый клиент';
+          break;
+        case 'change': 
+          title = 'Изменить данные';
+          break;
+      }
+      // return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
+      return title;
     },
 
     btnSubmit: function() {
-      return (this.type === 'delete') ? 'Удалить' : 'Сохранить'
+      return (this.type === 'delete') ? 'Удалить' : 'Сохранить';
     },
 
     btn: function() {
-      return (this.type === 'change') ? 'Удалить клиента' : 'Отмена'
+      return (this.type === 'change') ? 'Удалить клиента' : 'Отмена';
     },
   };
 
@@ -334,6 +348,7 @@
         // получил данные из базы о клиенте с id
         const client = await fetchGetClientById(this.dataset.id);
         // Вызвал модалку
+        // TODO а здесь нужно проверять на ответ на запрос?
         createModalWindow(client, structure);
       });
     });
@@ -603,9 +618,14 @@
   // Удаляю клиента
   async function onDelete(clientId) {
     // Удаляю из базы
-    await fetchDeleteClient(clientId);
-    // Получаю данные из базы и обновляю таблицу
-    await updateClientsInTable();
+    const response = await fetchDeleteClient(clientId);
+    if (response.ok) {
+      // Получаю данные из базы и обновляю таблицу
+      // console.log('Получили ок для удаления клиента');
+      await updateClientsInTable();
+    } else {
+      console.log('Удаление клиента. Ошибка HTTP: ' + response.status);
+    };
   };
 
   // Сохраняю данные клиента
@@ -631,7 +651,7 @@
     // Создал шапку модалки header элемент
     // ID передаём только в модалку по изменению данных клиента
     let idValue = null;
-    if (structure.type !== 'new') {
+    if (structure.type === 'change') {
       idValue = client.id; 
     };
 
@@ -652,7 +672,33 @@
       const clientContactsElement = createClientContactsOfModal(client.contacts);
       // К блоку с контактами добавил кнопку "Добавить клиента"
       formElement.append(clientContactsElement.fieldsetContacts);
-      wrapper.append(formElement);  
+      wrapper.append(formElement);
+
+      // Установка активности / неактивности кнопки "Добавить контакт"
+      disabledBtnAddContact(clientContactsElement.fieldsetContacts, clientContactsElement.btnAddContactElement);
+
+      // Удаляем контакт клиента из формы
+      const btnsDeleteOfContact = clientContactsElement.fieldsetContacts.querySelectorAll('delete-contact__btn');
+      btnsDeleteOfContact.forEach((e) => {
+        e.addEventListener('click', function(el) {
+          el.remove();
+          console.log('Удаление контакта', el);
+          console.log(document.querySelectorAll('.modal-contacts__item'));
+
+        });
+      });
+
+      // Показываем dropdown по клику на кнопке
+
+
+      const btnsTypeOfContactsList = clientContactsElement.fieldsetContacts.querySelectorAll('.contact-type__button btn');
+      btnsTypeOfContactsList.forEach((e) => {
+        e.addEventListener('click', function(el) {
+          console.log(el.currentTarget);
+          console.log(el.this);
+        });
+      });
+
     } else {
       // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
       const errorElement = createErrorForModal ('Вы действительно хотите удалить данного клиента?');
@@ -672,9 +718,18 @@
     document.body.append(modal);
 
     // Обработчики событий
+    // Нажатие на Esc
+    document.addEventListener('keydown', function(event) {
+      console.log(event);
+      if (event.code == "Escape") {
+        onClose(modal);
+      };
+    });
+
+
     // Клик на иконку закрытия окна
     btnWindowClose.addEventListener('click', function(e) {
-      console.log(e);
+      // console.log(e);
       onClose(modal);
     });
 
@@ -690,7 +745,7 @@
     btnsElement.btnSubmit.addEventListener('click', function(e) {
       if (structure.type == 'delete') {
 
-        onDelete(idValue); // Удаляем клиента из базы по ID
+        onDelete(client.id); // Удаляем клиента из базы по ID
         onClose(modal); // Закрываем модалку
         // Прорисовываем таблицу заново 
       } else {
@@ -706,15 +761,18 @@
       if (structure.type !== 'change') {
         onClose(modal);
       } else {
-        onDelete(idValue); // Удаляем клиента из базы по ID
+        onDelete(client.id); // Удаляем клиента из базы по ID
         onClose(modal); // Закрываем модалку
         // Прорисовываем таблицу заново 
       };
     });
 
-    // Для нового клиента раскрыть интупы
+    // Открытие дропдауна
+    showDropDown(modal);
+
+    // Для нового клиента раскрыть инпуты
     // Валидация инпутов ФИО
-    // Клик на кнопку добавить контакт. Деактивировать кнопку если десять контактов в функции createClientContactsOfModal
+    // Клик на кнопку добавить контакт.Деактивировать кнопку если десять контактов в функции createClientContactsOfModal
     // Форматирование и валидация инпутов контактов
     // Клик на кнопку удалить контакт
     // Селект для контактов
@@ -752,71 +810,111 @@
   function createClientNameOfModal(lastName, name, surname) {
     const fieldsetClientName = document.createElement('fieldset');
     const wrapperClientName = document.createElement('div');
+    const wrapperLastname = document.createElement('div');
+    const inputLastname = document.createElement('input');
     const lableLastname = document.createElement('lable');
     const asterixLastname = document.createElement('span');
-    const inputLastname = document.createElement('input');
+    const wrapperName = document.createElement('div');
+    const inputName = document.createElement('input');
     const lableName = document.createElement('lable');
     const asterixName = document.createElement('span');
-    const inputName = document.createElement('input');
+    const wrapperSurname = document.createElement('div');
     const lableSurname = document.createElement('lable');
     const inputSurname = document.createElement('input');
 
-    fieldsetClientName.classList.add('fieldset_reset');
+    fieldsetClientName.classList.add('fieldset_reset', 'modal-fullname');
     wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
+    wrapperLastname.classList.add('inputs__wrap');
+    inputLastname.classList.add('input', 'modal__intup');
     lableLastname.classList.add('modal__lable');
     asterixLastname.classList.add('lable_asterix');
-    inputLastname.classList.add('input', 'modal__intup', 'blocked');
+    wrapperName.classList.add('inputs__wrap');
+    inputName.classList.add('input', 'modal__intup');    
     lableName.classList.add('modal__lable');
     asterixName.classList.add('lable_asterix');
-    inputName.classList.add('input', 'modal__intup', 'blocked');    
+    wrapperSurname.classList.add('inputs__wrap');
+    inputSurname.classList.add('input', 'modal__intup');    
     lableSurname.classList.add('modal__lable');
-    inputSurname.classList.add('input', 'modal__intup', 'blocked');    
     
-    lableLastname.setAttribute('for', 'lastname');
     inputLastname.setAttribute('id', 'lastname');
     inputLastname.setAttribute('data-input', 'lastname');
     inputLastname.setAttribute('type', 'text');
     inputLastname.setAttribute('name', 'lastname');
     inputLastname.setAttribute('autofocus', 'true');
-    lableName.setAttribute('for', 'name');
+    lableLastname.setAttribute('for', 'lastname');
     inputName.setAttribute('id', 'name');
     inputName.setAttribute('data-input', 'name');
     inputName.setAttribute('type', 'text');
     inputName.setAttribute('name', 'name');
-    lableSurname.setAttribute('for', 'surname');
+    lableName.setAttribute('for', 'name');
     inputSurname.setAttribute('id', 'surname');
     inputSurname.setAttribute('data-input', 'surname');
     inputSurname.setAttribute('type', 'text');
     inputSurname.setAttribute('name', 'surname');
-
+    lableSurname.setAttribute('for', 'surname');
+    
     lableLastname.textContent = 'Фамилия';
     asterixLastname.textContent = '*';
     lableName.textContent = 'Имя';
     asterixName.textContent = '*';     
     lableSurname.textContent = 'Отчество';
 
-    if (lastName + name + surname) {
-      inputLastname.classList.remove('blocked');
-      inputName.classList.remove('blocked');
-      inputSurname.classList.remove('blocked');
+    if (lastName) {
+      lableLastname.classList.add('modal__lable_up');
       inputLastname.value = lastName;
+    }
+
+    if (name) {
+      lableName.classList.add('modal__lable_up');
       inputName.value = name;
+    }
+
+    if (surname) {
+      lableSurname.classList.add('modal__lable_up');
       inputSurname.value = surname;
     };
 
     lableLastname.append(asterixLastname);
     lableName.append(asterixName);
+
+    wrapperLastname.append(lableLastname);
+    wrapperLastname.append(inputLastname);
+    wrapperName.append(lableName);
+    wrapperName.append(inputName);
+    wrapperSurname.append(lableSurname);
+    wrapperSurname.append(inputSurname);
+
+    wrapperClientName.append(wrapperLastname);
+    wrapperClientName.append(wrapperName);
+    wrapperClientName.append(wrapperSurname);
     
-    wrapperClientName.append(lableLastname);
-    wrapperClientName.append(inputLastname);
-    wrapperClientName.append(lableName);
-    wrapperClientName.append(inputName);
-    wrapperClientName.append(lableSurname);
-    wrapperClientName.append(inputSurname);
     fieldsetClientName.append(wrapperClientName);
+
+    // TODO Подъем lables
+    showInpunsUnderLables(wrapperClientName);
 
     return fieldsetClientName;
   }
+
+  // Функция подъёма label если фокус на input
+  function showInpunsUnderLables (wrapperClientName) {
+    const inputsFullName = wrapperClientName.querySelectorAll('.inputs__wrap');
+    inputsFullName.forEach((e) => {
+      const inputElement = e.querySelector('.modal__intup');
+      const lableElement = e.querySelector('.modal__lable');
+      inputElement.onfocus = function() {
+        lableElement.classList.add('modal__lable_up');
+        // inputElement.classList.add('modal__intup_height');
+
+    };
+      inputElement.onblur =function() {
+        if(!inputElement.value) {
+          lableElement.classList.remove('modal__lable_up');
+          // inputElement.classList.remove('modal__intup_height');
+        }
+      };
+    }); 
+  };
 
   // Создал часть формы с контактами клиента
   function createClientContactsOfModal(contacts) {
@@ -841,9 +939,6 @@
 
     // Кнопка добавить клиента    
     const btnAddContactElement = createBtnAddContactForModal();
-    if (contacts.length === 10) {
-      btnAddContactElement.disabled = true;
-    }
     fieldsetContacts.append(wrapperContacts);
     fieldsetContacts.append(btnAddContactElement);
 
@@ -893,6 +988,11 @@
       btnContactTypeTitle.textContent = contact.type;
       inputContactValue.value = contact.value;
       btnContactDelete.classList.remove('blocked');
+
+      // Удаляю контакт клиента
+      btnContactDelete.addEventListener('click', function() {
+        contactItem.remove();
+      });
     };
 
     btnContactType.append(btnContactTypeTitle);
@@ -907,7 +1007,7 @@
 
     contactItem.append(wrapContactType);
     contactItem.append(inputContactValue);
-    contactItem.append(btnContactDelete);
+    contactItem.append(btnContactDelete);    
 
     return contactItem;
   };
@@ -918,7 +1018,7 @@
     const btnAddContactIcon = document.createElement('span');
     const btnAddContactTitle = document.createElement('span');
 
-    btnAddContact.classList.add('modal-addcontact__btn', 'btn');
+    btnAddContact.classList.add('modal-addcontact__btn', 'btn', VISIBLE_CSS);
     btnAddContactIcon.classList.add('modal-addcontact__icon');
     btnAddContactTitle.classList.add('modal-addcontact__title');
 
@@ -984,10 +1084,60 @@
     };
   };
 
+  // TODO Не решен вопрос возобнавления показа кнопки после удаления 10 элемента. Считаю количество контактов если 10 деактивируем кнопку Добавить контакт
+  function disabledBtnAddContact(lists,btnAddContact) {
+    // const list = document.querySelector('modal-contacts__item');
+     // console.log('Кол-во li', list);
+    // console.log("disabledBtnAddContact");
+    // console.log('lists', lists);
+    // console.log('btnAddContact', btnAddContact);
+    // console.log(lists.querySelectorAll('.modal-contacts__item').length);
+    if (lists.querySelectorAll('.modal-contacts__item').length >= 10) {
+      btnAddContact.classList.remove(VISIBLE_CSS);
+    } else {
+      btnAddContact.classList.add(VISIBLE_CSS);
+    };
+  };
+
+  //TODO пробую развернуть дропдаун
+  function showDropDown(modalElement) {
+    // .addEventListener('click', function() {
+
+    // })
+    const listItems = document.querySelectorAll('.contacts-type');
+    // console.log(listItems);
+    listItems.forEach((e) => {
+      const btnItem = e.querySelector('.contact-type__button');    
+      const dropdownList = e.querySelector('.contact-type__dropdown');
+      // console.log(btnItem);
+      // console.log(dropdownItem);
+      btnItem.addEventListener('click', function() {
+        dropdownList.classList.toggle('blocked');
+        const btnItemTitle = btnItem.querySelector('.contact-type__title');
+        const dropdownItems = dropdownList.querySelectorAll('.contact-type__item');
+        dropdownItems.forEach((item) => {
+          item.addEventListener('click', function() {
+            if (this.classList.contains('.contact-type__item')) {
+              btnItemTitle.textContent = this.innerText;
+              // dropdownList.classList.add('blocked');
+            }
+            console.log(this);
+            // console.log(this.innerText);
+            // btnItem.innerText = 'Пипец';
+            dropdownList.classList.add('blocked');
+          });
+        });
+
+
+      });
+    });
+
+  };
+
   // ============================
   // Серверная часть
   const URI = 'http://localhost:3000/api/clients';
-  const visibleCss = 'visible';
+  
 
   // TODO Это убрать. Только для тестов
   const delay = ms => {
@@ -1085,7 +1235,7 @@
     const response = await fetch(`${URI}/${id}`, {
       method: "DELETE",
     });
-    const data = await response.json();
+    return response;
   };
 
   async function updateClientsInTable() {
