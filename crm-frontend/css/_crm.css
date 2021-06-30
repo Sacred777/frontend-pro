@@ -641,6 +641,7 @@ transform: rotate(180deg);
 
 .modal-contacts__item {
   display: flex;
+  /* flex-wrap: nowrap; */
   margin-bottom: 15px;
   width: 100%;
 }

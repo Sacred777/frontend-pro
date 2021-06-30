@@ -612,6 +612,7 @@
 
   // TODO animation Закрываю модалку
   function onClose(element) {
+    // debugger;
     element.remove();
   };
 
@@ -674,18 +675,18 @@
       wrapper.append(formElement);
 
       // Установка активности / неактивности кнопки "Добавить контакт"
-      disabledBtnAddContact(clientContactsElement.fieldsetContacts, clientContactsElement.btnAddContactElement);
+      disabledBtnAddContact(clientContactsElement.btnAddContactElement, clientContactsElement.fieldsetContacts);
 
       // Удаляем контакт клиента из формы
-      const btnsDeleteOfContact = clientContactsElement.fieldsetContacts.querySelectorAll('delete-contact__btn');
-      btnsDeleteOfContact.forEach((e) => {
-        e.addEventListener('click', function(el) {
-          el.remove();
-          console.log('Удаление контакта', el);
-          console.log(document.querySelectorAll('.modal-contacts__item'));
+      // const btnsDeleteOfContact = clientContactsElement.fieldsetContacts.querySelectorAll('delete-contact__btn');
+      // btnsDeleteOfContact.forEach((e) => {
+      //   e.addEventListener('click', function(el) {
+      //     el.remove();
+      //     console.log('Удаление контакта', el);
+      //     console.log(document.querySelectorAll('.modal-contacts__item'));
 
-        });
-      });
+      //   });
+      // });
 
       const btnsTypeOfContactsList = clientContactsElement.fieldsetContacts.querySelectorAll('.contact-type__button btn');
       btnsTypeOfContactsList.forEach((e) => {
@@ -697,6 +698,12 @@
 
       // Добавляем контакт клиента
       addNewContact(clientContactsElement.btnAddContactElement, clientContactsElement.wrapperContacts);
+
+      // Удаляем контакт клиента
+      deleteContact(clientContactsElement.btnAddContactElement, clientContactsElement.wrapperContacts);
+
+      // Ловим ввод данных в инпут
+      checkValueInInputs(clientContactsElement.wrapperContacts);
 
     } else {
       // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
@@ -984,21 +991,19 @@
       btnContactType.textContent = contact.type;
       inputContactValue.value = contact.value;
       btnContactDelete.classList.remove('blocked');
-
-      // // Удаляю контакт клиента
-      // btnContactDelete.addEventListener('click', function() {
-      //   contactItem.remove();
-      // });
     };
+    
+    btnContactDelete.append(btnContactDeleteIcon);
 
     wrapContactType.append(btnContactType);
     wrapContactType.append(listContactTypeDropdown);
+    // wrapContactType.append(btnContactDelete);
 
-    btnContactDelete.append(btnContactDeleteIcon);
 
     contactItem.append(wrapContactType);
     contactItem.append(inputContactValue);
     contactItem.append(btnContactDelete);
+    
 
     return contactItem;
   };
@@ -1075,17 +1080,16 @@
     };
   };
 
-  // TODO Не решен вопрос возобнавления показа кнопки после удаления 10 элемента. Считаю количество контактов если 10 деактивируем кнопку Добавить контакт
-  function disabledBtnAddContact(lists,btnAddContact) {
-    // const list = document.querySelector('modal-contacts__item');
-     // console.log('Кол-во li', list);
-    // console.log("disabledBtnAddContact");
-    // console.log('lists', lists);
-    // console.log('btnAddContact', btnAddContact);
-    // console.log(lists.querySelectorAll('.modal-contacts__item').length);
-    if (lists.querySelectorAll('.modal-contacts__item').length >= 10) {
+  // Считаю количество контактов если 10 деактивируем кнопку Добавить контакт
+  function disabledBtnAddContact(btnAddContact, wrapper) {
+    // console.log(wrapper);
+    const items = wrapper.querySelectorAll('.modal-contacts__item');
+    // console.log(items.length);
+    if (items.length >= 10) {
+      // console.log('Превышает норму');
       btnAddContact.classList.remove(VISIBLE_CSS);
     } else {
+      // console.log('Не превышает норму');
       btnAddContact.classList.add(VISIBLE_CSS);
     };
   };
@@ -1093,70 +1097,138 @@
   //Развернул дропдаун
   function showDropDown(modalElement) {
     const dropdowns = modalElement.querySelectorAll('.contacts-type');
+    // console.log(dropdowns);
+    // console.log(dropdowns.length);
 
     dropdowns.forEach((e) => {
-      const btnDropdown = e.querySelector('.contact-type__button');
-      const listDropdown = e.querySelector('.contact-type__list');
-      const itemDropdown = listDropdown.querySelectorAll('.contact-type__item');
-      // const inputDropdown = e.querySelector('.dropdown__input');
-    
-    // Отслеживаем клик на кнопке (открыть/закрыть список)
-      btnDropdown.addEventListener('click', function(){
-        listDropdown.classList.toggle('contact-type__list_visible');
-        btnDropdown.classList.toggle('contact-type__button_rotate');
-        // btnDropdown.classList.add('dropdown__button_active');
-      });
-    
-    // Отслеживаем клик по элементам списка и присваивание значения кнопке
-      itemDropdown.forEach((e) => {
-        e.addEventListener('click', function(el) {
-          // el.stopPropagation();
-          btnDropdown.textContent = this.innerText;
-          btnDropdown.focus();
-          // inputDropdown.value = this.dataset.value;
-          hidenDropdown(listDropdown, btnDropdown);
-          // listDropdown.classList.remove('contact-type__list_visible');
-          // btnDropdown.classList.remove('contact-type__button_rotate');
-   
-        }); 
-      });
-    
-    // Клик снаружи дропдауна. Закрыть дропдаун
-      document.addEventListener('click', function(e) {
-        if (e.target !== btnDropdown) {
-          // btnDropdown.classList.remove('dropdown__button_active');
-          hidenDropdown(listDropdown, btnDropdown);
-          // listDropdown.classList.remove('contact-type__list_visible');
-          // btnDropdown.classList.remove('contact-type__button_rotate');
-        };  
-      });
-    
-    // Нажатие на Таб или Эскейп. Закрыть дропдаун
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab' || e.key === 'Escape') {
-          // btnDropdown.classList.remove('dropdown__button_active');
-          hidenDropdown(listDropdown, btnDropdown);
-          // listDropdown.classList.remove('contact-type__list_visible');
-          // btnDropdown.classList.remove('contact-type__button_rotate');
-        };
-      });
-    });   
+      setEventsOnDropdown(e)
+    });
   };
 
-  // В фнункции showDropDown повторение кода - удаление свойст показа списка дропдауна
-  function hidenDropdown(list, button) {
-    list.classList.remove('contact-type__list_visible');
-    button.classList.remove('contact-type__button_rotate');
+  // Добавление слушателей к элементам дропдауна
+  function setEventsOnDropdown(element) {
+    const btnDropdown = element.querySelector('.contact-type__button');
+    const listDropdown = element.querySelector('.contact-type__list');
+    const itemDropdown = listDropdown.querySelectorAll('.contact-type__item');
+    // const inputDropdown = e.querySelector('.dropdown__input');
+  
+  // Отслеживаем клик на кнопке (открыть/закрыть список)
+    btnDropdown.addEventListener('click', function(e){
+      e.preventDefault();
+      listDropdown.classList.toggle('contact-type__list_visible');
+      btnDropdown.classList.toggle('contact-type__button_rotate');
+      // btnDropdown.classList.add('dropdown__button_active');
+    });
+  
+  // Отслеживаем клик по элементам списка и присваивание значения кнопке
+    itemDropdown.forEach((e) => {
+      e.addEventListener('click', function(el) {
+        el.stopPropagation();
+        btnDropdown.textContent = this.innerText;
+        btnDropdown.focus();
+        // inputDropdown.value = this.dataset.value;
+        hidenDropdown(listDropdown, btnDropdown);
+      }); 
+    });
+  
+  // Клик снаружи дропдауна. Закрыть дропдаун
+    document.addEventListener('click', function(e) {
+      if (e.target !== btnDropdown) {
+        // btnDropdown.classList.remove('dropdown__button_active');
+        hidenDropdown(listDropdown, btnDropdown);
+      };  
+    });
+  
+  // Нажатие на Таб или Эскейп. Закрыть дропдаун
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab' || e.key === 'Escape') {
+        // btnDropdown.classList.remove('dropdown__button_active');
+        hidenDropdown(listDropdown, btnDropdown);
+      };
+    });
   };
 
+  // В функции setEventsOnDropdown повторение кода - удаление свойст показа списка дропдауна
+  function hidenDropdown(listDropdown, btnDropdown) {
+    listDropdown.classList.remove('contact-type__list_visible');
+    btnDropdown.classList.remove('contact-type__button_rotate');
+  };
+
+  // Добавление события ввода данных в инпуты контактов
+  function checkValueInInputs(modalElement) {
+    const contacts = modalElement.querySelectorAll('.modal-contacts__item');
+    contacts.forEach((e) => {
+      setEventsOnInput(e);
+    });    
+  };
+
+  // В функции checkValueInInputs повторение кода - установка видимости кнопки "Удалить контакт"
+  function setEventsOnInput(element) {
+    const btnDeleteContact = element.querySelector('.delete-contact__btn');
+    const inputContact = element.querySelector('.contact-value');
+
+    // console.log(btnDeleteContact);
+    element.addEventListener('input', function(e) {
+      e.stopPropagation();
+      // console.log('Начал вводить');
+      if (inputContact.value) {
+        btnDeleteContact.classList.remove('blocked');
+      } else {
+        btnDeleteContact.classList.add('blocked');
+      };
+      // console.log(element.nextElementSibling);
+    });
+  };
+
+  // Добавляем новый контакт клиенту
   function addNewContact(btnAddContact, wrapperContacts) {
     console.log(wrapperContacts);
-    btnAddContact.addEventListener('click', function() {
-      console.log('Нажал на кнопку');
+    const listContacts = wrapperContacts.querySelector('.modal-contacts__list');
+    btnAddContact.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       const contactItem = createContactForModal('');
-      console.log(contactItem);
-      wrapperContacts.append(contactItem);
-      showDropDown(wrapperContacts);
+      
+      listContacts.append(contactItem);
+
+      // Добавил новому элементу события для дропдауна
+      setEventsOnDropdown(contactItem);
+      
+      // Добавил новому элементу событие на ввод данных
+      setEventsOnInput(contactItem);
+
+      // Добавил новому элементу событие на кнопку "Удалить контакт"
+      setEventOnBtnDeleteContact(contactItem,  btnAddContact, wrapperContacts);
+      
+      disabledBtnAddContact(btnAddContact, wrapperContacts);
+    });
+  };
+
+  // Удаляем контакт по кнопке
+  function deleteContact(btnAddContact, wrapperContacts) {
+    const btnDelete = wrapperContacts.querySelectorAll('.modal-contacts__item');
+
+    btnDelete.forEach((e) => {
+      setEventOnBtnDeleteContact(e, btnAddContact, wrapperContacts);
+      // e.addEventListener('click', function() {
+      //   this.parentNode.remove();
+        // disabledBtnAddContact(btnAddContact, wrapperContacts);
+      // });
+    });
+  };
+
+  function setEventOnBtnDeleteContact(element,  btnAddContact, wrapperContacts) {
+    console.log(element);
+    const btnDelete = element.querySelector('.delete-contact__btn');
+    btnDelete.addEventListener('click', function() {
+      // if (this.classList.contains !== 'delete-contact__btn') {
+        // return;
+      // }
+      // console.log(e);
+      // console.log(this);
+      element.remove();
+      disabledBtnAddContact(btnAddContact, wrapperContacts);
     });
   };
 
