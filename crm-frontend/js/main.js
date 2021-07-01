@@ -2,6 +2,7 @@
 
   const DELAY_TIME = 300; //300 мс установлено тех. заданием
   const VISIBLE_CSS = 'visible';
+  const URI = 'http://localhost:3000/api/clients';
 
   // Объект состояния клиентов (сортировка, массив объектов клиентов)
   const clientsState = {
@@ -35,7 +36,6 @@
           title = 'Изменить данные';
           break;
       }
-      // return (this.type === 'change') ? 'Изменить данные' : (this.type === 'new') ? 'Новый клиент' : 'Удалить клиента'
       return title;
     },
 
@@ -128,7 +128,6 @@
     title.innerText = 'Клиенты';
     headThId.setAttribute('id', 'id');
     headThIdTitle.innerText = 'ID';
-    // headThIdTitle.setAttribute('data-sort', 'true');
     headThFullname.setAttribute('id', 'fullname');
     headThFullnameTitle.innerText = 'Фамилия Имя Отчество';
     headThFullnameDescr.innerText = 'А-Я';
@@ -352,9 +351,6 @@
         createModalWindow(client, structure);
       });
     });
-    
-
-
 
     return tbody;
   };
@@ -484,7 +480,7 @@
     return ClientsArray.sort((a, b) => a.id < b.id ? 1 : -1);
   }
 
-  // Сорировка списка клиентов по полю Ф.И.О.
+  // Сортировка списка клиентов по полю Ф.И.О.
   function sortClientsByFullname(ClientsArray, ascending) {
     if (ascending) {
       return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() < b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
@@ -494,9 +490,6 @@
 
   // Сорировка списка клиентов по полю Дата и время создания
   function sortClientsByDate(ClientsArray, field, ascending) {
-    // console.log(ClientsArray);
-    // console.log(field);
-    // console.log(ascending);
     if (ascending) {
       return ClientsArray.sort((a, b) => new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1);
     }
@@ -505,7 +498,6 @@
 
   // Маркировка столбца сортировки
   function markColumnOfSort(column, sorting) {
-    // console.log(column, sorting);
     const columns = document.querySelectorAll('.table__column_sort');
     columns.forEach((e) => {
       if (e.id === column) {
@@ -545,8 +537,6 @@
       let target = event.target;
       let tooltipType = target.dataset.type;
       let tooltipValue = target.dataset.value;
-      // console.log(tooltipType);
-      // console.log(tooltipValue);
 
       if (!tooltipType & !tooltipValue) return;
 
@@ -597,7 +587,6 @@
     const combElement = tbodyElement.querySelectorAll('#comb');
     combElement.forEach((e) => {
       e.addEventListener('click', function() {
-        console.log('Клик на ', e);
         const contactsElement = e.parentNode.querySelectorAll('.contacts__item');
         contactsElement.forEach((el) => {
          if (el.id) {
@@ -610,29 +599,7 @@
     });
   }
 
-  // TODO animation Закрываю модалку
-  function onClose(element) {
-    // debugger;
-    element.remove();
-  };
 
-  // Удаляю клиента
-  async function onDelete(clientId) {
-    // Удаляю из базы
-    const response = await fetchDeleteClient(clientId);
-    if (response.ok) {
-      // Получаю данные из базы и обновляю таблицу
-      // console.log('Получили ок для удаления клиента');
-      await updateClientsInTable();
-    } else {
-      console.log('Удаление клиента. Ошибка HTTP: ' + response.status);
-    };
-  };
-
-  // Сохраняю данные клиента
-  function onSave() {
-
-  };
 
   // ========= Отрисовка модального окна
   // Собираю модалку
@@ -666,45 +633,26 @@
 
     // Создал части формы
     if (structure.type !== 'delete') {
-      // Блок с ФИО клиента
+      // Создал Блок с ФИО клиента
       const clietntNameElement = createClientNameOfModal(client.lastName, client.name, client.surname);
       formElement.append(clietntNameElement);
-      // Блок с контактами клиента
+      
+      // Создал Блок с контактами клиента
       const clientContactsElement = createClientContactsOfModal(client.contacts);
       formElement.append(clientContactsElement.fieldsetContacts);
       wrapper.append(formElement);
 
-      // Установка активности / неактивности кнопки "Добавить контакт"
+      // Добавил переключатель активна/неактивна кнопка "Добавить контакт" (по кол-ву контактов)
       disabledBtnAddContact(clientContactsElement.btnAddContactElement, clientContactsElement.fieldsetContacts);
 
-      // Удаляем контакт клиента из формы
-      // const btnsDeleteOfContact = clientContactsElement.fieldsetContacts.querySelectorAll('delete-contact__btn');
-      // btnsDeleteOfContact.forEach((e) => {
-      //   e.addEventListener('click', function(el) {
-      //     el.remove();
-      //     console.log('Удаление контакта', el);
-      //     console.log(document.querySelectorAll('.modal-contacts__item'));
-
-      //   });
-      // });
-
-      const btnsTypeOfContactsList = clientContactsElement.fieldsetContacts.querySelectorAll('.contact-type__button btn');
-      btnsTypeOfContactsList.forEach((e) => {
-        e.addEventListener('click', function(el) {
-          console.log(el.currentTarget);
-          console.log(el.this);
-        });
-      });
-
-      // Добавляем контакт клиента
+      // Добавление нового клиента при нажатии на кнопку
       addNewContact(clientContactsElement.btnAddContactElement, clientContactsElement.wrapperContacts);
 
-      // Удаляем контакт клиента
+      // Удаление контакта клиента при нажатии на кнопку
       deleteContact(clientContactsElement.btnAddContactElement, clientContactsElement.wrapperContacts);
 
-      // Ловим ввод данных в инпут
+      // Добавил переключатель активна/неактивна кнока "Удалить контакт" при условии наличия данных в инпуте 
       checkValueInInputs(clientContactsElement.wrapperContacts);
-
     } else {
       // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
       const errorElement = createErrorForModal ('Вы действительно хотите удалить данного клиента?');
@@ -726,16 +674,13 @@
     // Обработчики событий
     // Нажатие на Esc
     document.addEventListener('keydown', function(event) {
-      console.log(event);
       if (event.code == "Escape") {
         onClose(modal);
       };
     });
-
-
+    
     // Клик на иконку закрытия окна
     btnWindowClose.addEventListener('click', function(e) {
-      // console.log(e);
       onClose(modal);
     });
 
@@ -749,17 +694,18 @@
 
     // Клик на большую кнопку
     btnsElement.btnSubmit.addEventListener('click', function(e) {
+      // e.preventDefault(); TODO как сделать submit?
       if (structure.type == 'delete') {
-
-        onDelete(client.id); // Удаляем клиента из базы по ID
-        onClose(modal); // Закрываем модалку
-        // Прорисовываем таблицу заново 
+        onDelete(client.id, modal); // Удаляем клиента из базы по ID
       } else {
-        onSave(clientObjForSaving);
-        onClose(modal); // Закрываем модалку
-        // Прорисовываем таблицу заново 
+        // Собираем данные из формы
+        const objOfClient = getValuesFromModal(modal);
+        if (structure.type == 'new') {
+          onSave(objOfClient, modal);
+        } else if (structure.type == 'change') {
+          onUpdate(objOfClient, idValue, modal);
+        };
       };
-      
     });
 
     // Клик на маленькую кнопку
@@ -769,25 +715,11 @@
       } else {
         onDelete(client.id); // Удаляем клиента из базы по ID
         onClose(modal); // Закрываем модалку
-        // Прорисовываем таблицу заново 
       };
     });
 
-    // Открытие дропдауна
+    // Добавил открытие дропдауна при нажатии на кнопку
     showDropDown(modal);
-
-    // Для нового клиента раскрыть инпуты
-    // Валидация инпутов ФИО
-
-    // Клик на кнопку добавить контакт.Деактивировать кнопку если десять контактов в функции createClientContactsOfModal
-    // console.log(clientContactsElement.btnAddContactElement);
-    // addNewContact(clientContactsElement.btnAddContactElement);
-
-
-    // Форматирование и валидация инпутов контактов
-    // Клик на кнопку удалить контакт
-    // Селект для контактов
-
 
     return modal;
   };
@@ -915,14 +847,11 @@
       const lableElement = e.querySelector('.modal__lable');
       inputElement.onfocus = function() {
         lableElement.classList.add('modal__lable_up');
-        // inputElement.classList.add('modal__intup_height');
-
     };
       inputElement.onblur =function() {
         if(!inputElement.value) {
           lableElement.classList.remove('modal__lable_up');
-          // inputElement.classList.remove('modal__intup_height');
-        }
+        };
       };
     }); 
   };
@@ -997,13 +926,10 @@
 
     wrapContactType.append(btnContactType);
     wrapContactType.append(listContactTypeDropdown);
-    // wrapContactType.append(btnContactDelete);
-
 
     contactItem.append(wrapContactType);
     contactItem.append(inputContactValue);
     contactItem.append(btnContactDelete);
-    
 
     return contactItem;
   };
@@ -1082,14 +1008,10 @@
 
   // Считаю количество контактов если 10 деактивируем кнопку Добавить контакт
   function disabledBtnAddContact(btnAddContact, wrapper) {
-    // console.log(wrapper);
     const items = wrapper.querySelectorAll('.modal-contacts__item');
-    // console.log(items.length);
     if (items.length >= 10) {
-      // console.log('Превышает норму');
       btnAddContact.classList.remove(VISIBLE_CSS);
     } else {
-      // console.log('Не превышает норму');
       btnAddContact.classList.add(VISIBLE_CSS);
     };
   };
@@ -1097,8 +1019,6 @@
   //Развернул дропдаун
   function showDropDown(modalElement) {
     const dropdowns = modalElement.querySelectorAll('.contacts-type');
-    // console.log(dropdowns);
-    // console.log(dropdowns.length);
 
     dropdowns.forEach((e) => {
       setEventsOnDropdown(e)
@@ -1110,14 +1030,12 @@
     const btnDropdown = element.querySelector('.contact-type__button');
     const listDropdown = element.querySelector('.contact-type__list');
     const itemDropdown = listDropdown.querySelectorAll('.contact-type__item');
-    // const inputDropdown = e.querySelector('.dropdown__input');
   
   // Отслеживаем клик на кнопке (открыть/закрыть список)
     btnDropdown.addEventListener('click', function(e){
       e.preventDefault();
       listDropdown.classList.toggle('contact-type__list_visible');
       btnDropdown.classList.toggle('contact-type__button_rotate');
-      // btnDropdown.classList.add('dropdown__button_active');
     });
   
   // Отслеживаем клик по элементам списка и присваивание значения кнопке
@@ -1126,7 +1044,6 @@
         el.stopPropagation();
         btnDropdown.textContent = this.innerText;
         btnDropdown.focus();
-        // inputDropdown.value = this.dataset.value;
         hidenDropdown(listDropdown, btnDropdown);
       }); 
     });
@@ -1134,7 +1051,6 @@
   // Клик снаружи дропдауна. Закрыть дропдаун
     document.addEventListener('click', function(e) {
       if (e.target !== btnDropdown) {
-        // btnDropdown.classList.remove('dropdown__button_active');
         hidenDropdown(listDropdown, btnDropdown);
       };  
     });
@@ -1142,7 +1058,6 @@
   // Нажатие на Таб или Эскейп. Закрыть дропдаун
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Tab' || e.key === 'Escape') {
-        // btnDropdown.classList.remove('dropdown__button_active');
         hidenDropdown(listDropdown, btnDropdown);
       };
     });
@@ -1167,16 +1082,13 @@
     const btnDeleteContact = element.querySelector('.delete-contact__btn');
     const inputContact = element.querySelector('.contact-value');
 
-    // console.log(btnDeleteContact);
     element.addEventListener('input', function(e) {
       e.stopPropagation();
-      // console.log('Начал вводить');
       if (inputContact.value) {
         btnDeleteContact.classList.remove('blocked');
       } else {
         btnDeleteContact.classList.add('blocked');
       };
-      // console.log(element.nextElementSibling);
     });
   };
 
@@ -1211,10 +1123,6 @@
 
     btnDelete.forEach((e) => {
       setEventOnBtnDeleteContact(e, btnAddContact, wrapperContacts);
-      // e.addEventListener('click', function() {
-      //   this.parentNode.remove();
-        // disabledBtnAddContact(btnAddContact, wrapperContacts);
-      // });
     });
   };
 
@@ -1222,21 +1130,95 @@
     console.log(element);
     const btnDelete = element.querySelector('.delete-contact__btn');
     btnDelete.addEventListener('click', function() {
-      // if (this.classList.contains !== 'delete-contact__btn') {
-        // return;
-      // }
-      // console.log(e);
-      // console.log(this);
       element.remove();
       disabledBtnAddContact(btnAddContact, wrapperContacts);
     });
   };
 
-  // ============================
-  // Серверная часть
-  const URI = 'http://localhost:3000/api/clients';
-  
+  function getValuesFromModal(modal) {
+    const lastName = modal.querySelector('#lastname').value.trim();
+    const name = modal.querySelector('#name').value.trim();
+    const surname = modal.querySelector('#surname').value.trim();
+    const contacts = [];
+    const itemContacts = modal.querySelectorAll('.modal-contacts__item');
 
+    itemContacts.forEach((e) => {
+      const type = e.querySelector('.contact-type__button').innerText;
+      const value = e.querySelector('.contact-value').value.trim();
+      const objContact = {
+        type,
+        value
+      };
+      contacts.push(objContact);
+    });
+
+    return {
+      name,
+      surname,
+      lastName,
+      contacts,
+    };
+  };
+
+  // TODO animation Закрываю модалку  
+  function onClose(modal) {
+    modal.remove();
+  };
+  
+  // Удаляю клиента
+  async function onDelete(clientId, modal) {
+    // Удаляю из базы
+    const response = await fetchDeleteClient(clientId);
+    httpErrorHandler(response, modal);
+  };
+  
+  // Добавляю нового клиента 
+  async function onSave(objOfClient, modal) {
+    const response = await fetchAddClient(objOfClient);
+    httpErrorHandler(response, modal);
+  };
+  
+  // Обновляю данные клиента
+  async function onUpdate(objOfClient, clientId, modal) {
+    console.log(objOfClient);
+    console.log(clientId);
+    const response = await fetchUpdateClient(objOfClient, clientId);
+    httpErrorHandler(response, modal);
+  };
+
+  // Обработка HTTP ошибок 
+  async function httpErrorHandler(response, modal) {
+    let info = null;
+
+    if(response.ok) {
+      await updateClientsInTable();
+      onClose(modal);
+    } else {
+      if (structure.type !== 'delete') {
+        if ( response.status > 499 & response.status < 600) {
+          info = `Данные не сохранены. Ответ сервера - ${response.status}. Ошибка работы сервера.`;
+        } else {
+          switch(response.status) {
+            case 404:
+              info = 'Данные не сохранены. Ответ сервера - 404. Не удалось найти запрашиваемую страницую.';
+              break;
+            case 422:
+              info = 'Данные не сохранены. Ответ сервера - 422. В теле запроса допущена логическая ошибка.';
+              break;
+            default:
+              info = '"Что-то пошло не так..."';
+              break;
+          };
+        };
+        const errorElement = createErrorForModal(info);
+        const wrapper = document.querySelector('.modal-contacts');
+        wrapper.append(errorElement.wrapperError);
+      };
+    };
+  };
+
+
+  // ========== Серверная часть
   // TODO Это убрать. Только для тестов
   const delay = ms => {
     return new Promise(r => setTimeout(() => r(), ms));
@@ -1254,53 +1236,20 @@
   async function fetchSearchClients(search) {
     // await delay(5000); // TODO Для установления задержки
     const url = `${URI}?search=${search}`;
-    // console.log(search, url);
     const pesponse = await fetch(url);
     const data = await pesponse.json();
-    // console.log(data);
     return data;
   };
 
   // Добавляем клиента в базу
   async function fetchAddClient(obj) {
-    fetch(URI, {
+    const response = await fetch(URI, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        // ID клиента, заполняется сервером автоматически, после создания нельзя изменить
-        // id: '1234567890',
-        // дата и время создания клиента, заполняется сервером автоматически, после создания нельзя изменить
-        // createdAt: '2021-04-03T13:07:29.554Z',
-        // дата и время изменения клиента, заполняется сервером автоматически при изменении клиента
-        // updatedAt: '2021-04-03T13:07:29.554Z',
-        // * обязательное поле, имя клиента
-        name: 'Олег',
-        // * обязательное поле, фамилия клиента
-        surname: 'Корнеев',
-        // необязательное поле, отчество клиента
-        lastName: 'Викторович',
-        // контакты - необязательное поле, массив контактов
-        // каждый объект в массиве (если он передан) должен содержать непустые свойства type и value
-        contacts: [
-          {
-            type: 'Телефон',
-            value: '+71234567892'
-          },
-          {
-            type: 'Email',
-            value: 'abcr@xyz.com'
-          },
-          {
-            type: 'Facebook',
-            value: 'https://facebook.com/oleg-korneev'
-          },
-          {
-            type: 'VK',
-            value: 'https://vk.ru/oleg-korneev'
-          },
-        ],
-      }),
-    });
+      body: JSON.stringify(obj),
+    });  
+
+    return response;
   };
 
   // Получаем клиента по его ID
@@ -1311,21 +1260,13 @@
   };
 
   // Обновляем данные клиента по ID
-  async function fetchUpdateClient(id) {
+  async function fetchUpdateClient(obj, id) {
     const response = await fetch(`${URI}/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contacts: [
-          {
-            type: 'Телефон',
-            value: '+71234567892'
-          },
-        ]
-      })
+      body: JSON.stringify(obj),
     });
-    const data = await response.json();
-    return data;
+    return response;
   };
 
   // Удаляем клиента по ID. Ничего не возвращает в body
