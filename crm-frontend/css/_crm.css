@@ -577,6 +577,7 @@ transform: rotate(180deg);
 }
 
 .modal__intup {
+  z-index: 10;
   background: transparent;
   border: none;
   /* outline: none; */

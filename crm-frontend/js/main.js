@@ -631,6 +631,9 @@
     formElement.classList.add('modal__form');
     formElement.setAttribute('action', '#');
 
+    // Создал Блок ошибок
+    const blockError = createErrorForModal();
+
     // Создал части формы
     if (structure.type !== 'delete') {
       // Создал Блок с ФИО клиента
@@ -653,12 +656,19 @@
 
       // Добавил переключатель активна/неактивна кнока "Удалить контакт" при условии наличия данных в инпуте 
       checkValueInInputs(clientContactsElement.wrapperContacts);
+
+      // Добавил Блок Ошибок
+      wrapper.append(blockError.wrapperError);
+
     } else {
-      // Модалка на удаление клиента. Создал Блок предупреждений / ошибок
-      const errorElement = createErrorForModal ('Вы действительно хотите удалить данного клиента?');
+       // Добавил Блок Ошибок
+       wrapper.append(blockError.wrapperError);
+       // Показал его
+       blockError.wrapperError.classList.remove('blocked');
+      // Записал значение ошибки/предупреждения
+      blockError.spanError.textContent = 'Вы действительно хотите удалить данного клиента?';
       // Меняем цвет блока ошибок
-      errorElement.spanError.classList.add('modal-error__text-style');
-      wrapper.append(errorElement.wrapperError);
+      blockError.spanError.classList.add('modal-error__text-style');
       // Выравнивание заголовка шапки посредине
       headerElement.header.classList.add('align-center', 'modal-header-margin-bottom');
       headerElement.headerTitle.classList.add('modal-header__heading-padding-top');
@@ -713,8 +723,8 @@
       if (structure.type !== 'change') {
         onClose(modal);
       } else {
-        onDelete(client.id); // Удаляем клиента из базы по ID
-        onClose(modal); // Закрываем модалку
+        onDelete(client.id, modal); // Удаляем клиента из базы по ID
+        // onClose(modal); // Закрываем модалку
       };
     });
 
@@ -954,15 +964,14 @@
   }
 
   // Создал блок с выводом ошибок и др. инфорации
-  function createErrorForModal(info) {
+  function createErrorForModal() {
     const wrapperError = document.createElement('div');
     const spanError = document.createElement('span');
     
-    wrapperError.classList.add('modal-error');
+    wrapperError.classList.add('modal-error', 'blocked');
     spanError.classList.add('modal-error__text');
     
     wrapperError.classList.remove('blocked');
-    spanError.textContent = info;
 
     wrapperError.append(spanError);
     
@@ -1094,7 +1103,6 @@
 
   // Добавляем новый контакт клиенту
   function addNewContact(btnAddContact, wrapperContacts) {
-    console.log(wrapperContacts);
     const listContacts = wrapperContacts.querySelector('.modal-contacts__list');
     btnAddContact.addEventListener('click', function(e) {
       e.preventDefault();
@@ -1127,7 +1135,6 @@
   };
 
   function setEventOnBtnDeleteContact(element,  btnAddContact, wrapperContacts) {
-    console.log(element);
     const btnDelete = element.querySelector('.delete-contact__btn');
     btnDelete.addEventListener('click', function() {
       element.remove();
@@ -1180,8 +1187,6 @@
   
   // Обновляю данные клиента
   async function onUpdate(objOfClient, clientId, modal) {
-    console.log(objOfClient);
-    console.log(clientId);
     const response = await fetchUpdateClient(objOfClient, clientId);
     httpErrorHandler(response, modal);
   };
@@ -1189,6 +1194,9 @@
   // Обработка HTTP ошибок 
   async function httpErrorHandler(response, modal) {
     let info = null;
+    const wrapperError = modal.querySelector('.modal-error');
+    // console.log(wrapperError);
+    const spanError = wrapperError.querySelector('.modal-error__text');
 
     if(response.ok) {
       await updateClientsInTable();
@@ -1210,9 +1218,13 @@
               break;
           };
         };
-        const errorElement = createErrorForModal(info);
-        const wrapper = document.querySelector('.modal-contacts');
-        wrapper.append(errorElement.wrapperError);
+
+        wrapperError.classList.remove('blocked');
+        spanError.textContent = info;
+        // TODO Вернуть данные в Блок ошибок
+        // const errorElement = createErrorForModal(info);
+        // const wrapper = document.querySelector('.modal-contacts');
+        // wrapper.append(errorElement.wrapperError);
       };
     };
   };
