@@ -286,7 +286,7 @@
       btnDelete.setAttribute('data-id', e.id);
 
       tdId.innerText = e.id.slice(-6);
-      tdFullname.innerText = getFullname(e.lastName, e.name, e.surname);
+      tdFullname.innerText = getFullname(e.surname, e.name, e.lastName);
       createDate.innerText = formatDate(e.createdAt);
       createTime.innerText = formatTime(e.createdAt);
       updateDate.innerText = formatDate(e.updatedAt);
@@ -342,13 +342,19 @@
     changeClientBtns.forEach((e) => {
       e.addEventListener('click', async function(el) {
         const clientId = this.dataset.id;
+        const iconElement = e.querySelector('.edit-btn__icon');
         // Установил тип окна для модалки 
         structure.type = 'change';
+        iconElement.classList.add('load__icon');
         // получил данные из базы о клиенте с id
         const client = await fetchGetClientById(this.dataset.id);
+        iconElement.classList.remove('load__icon');
         // Вызвал модалку
         // TODO а здесь нужно проверять на ответ на запрос?
-        createModalWindow(client, structure);
+        // if (client.response.status === 200) {
+          // debugger;
+          createModalWindow(client, structure);
+        // };
       });
     });
 
@@ -356,16 +362,16 @@
   };
   
   // Получаем полное имя в одну строку
-  function getFullname(lastName, name, surname) {
+  function getFullname(surname, name, lastName) {
     const nameArray = [];
-    if (lastName) {
-      nameArray.push(lastName.trim());
+    if (surname) {
+      nameArray.push(surname.trim());
     }
     if (name) {
       nameArray.push(name.trim());
     }
-    if (surname) {
-      nameArray.push(surname.trim());
+    if (lastName) {
+      nameArray.push(lastName.trim());
     }
     return nameArray.join(' ');
   }
@@ -483,9 +489,9 @@
   // Сортировка списка клиентов по полю Ф.И.О.
   function sortClientsByFullname(ClientsArray, ascending) {
     if (ascending) {
-      return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() < b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+      return ClientsArray.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() < b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
      }
-     return ClientsArray.sort((a, b) => a.lastName.trim().toLowerCase() + a.name.trim().toLowerCase() + a.surname.trim().toLowerCase() > b.lastName.trim().toLowerCase() + b.name.trim().toLowerCase() + b.surname.trim().toLowerCase() ? 1 : -1);
+     return ClientsArray.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() > b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
   }
 
   // Сорировка списка клиентов по полю Дата и время создания
@@ -603,7 +609,7 @@
 
   // ========= Отрисовка модального окна
   // Собираю модалку
-  function createModalWindow(client, structure) {
+  function createModalWindow(client) {
     // Создал контейнер
     const modal = document.createElement('div');
     const wrapper = document.createElement('div');
@@ -637,7 +643,7 @@
     // Создал части формы
     if (structure.type !== 'delete') {
       // Создал Блок с ФИО клиента
-      const clietntNameElement = createClientNameOfModal(client.lastName, client.name, client.surname);
+      const clietntNameElement = createClientNameOfModal(client.surname, client.name, client.lastName);
       formElement.append(clietntNameElement);
       
       // Создал Блок с контактами клиента
@@ -685,7 +691,7 @@
     // Нажатие на Esc
     document.addEventListener('keydown', function(event) {
       if (event.code == "Escape") {
-        onClose(modal);
+        onClose(modal, wrapper);
       };
     });
     
@@ -703,18 +709,28 @@
     });
 
     // Клик на большую кнопку
-    btnsElement.btnSubmit.addEventListener('click', function(e) {
+    btnsElement.btnSubmit.addEventListener('click', async function(e) {
       // e.preventDefault(); TODO как сделать submit?
       if (structure.type == 'delete') {
         onDelete(client.id, modal); // Удаляем клиента из базы по ID
       } else {
-        // Собираем данные из формы
+        // Собираем данные из формы здесь же можно установить в disabled
         const objOfClient = getValuesFromModal(modal);
+        const iconBtnSubmit = btnsElement.btnSubmit.querySelector('.submit-btn__icon');
+        console.log(iconBtnSubmit);
+        // Ставим лоадер на кнопку
+        iconBtnSubmit.classList.add(VISIBLE_CSS);
+        // Устанавливаем disabled на форму
+        setDisabledOnElementsOfForm(modal, true);
         if (structure.type == 'new') {
-          onSave(objOfClient, modal);
+          await onSave(objOfClient, modal);
         } else if (structure.type == 'change') {
-          onUpdate(objOfClient, idValue, modal);
+          await onUpdate(objOfClient, idValue, modal);
         };
+        //Убираем лоадер с кнопки
+        iconBtnSubmit.classList.remove(VISIBLE_CSS); 
+        // Снимаем disabled
+        setDisabledOnElementsOfForm(modal);
       };
     });
 
@@ -730,6 +746,13 @@
 
     // Добавил открытие дропдауна при нажатии на кнопку
     showDropDown(modal);
+
+    const timeoutId = setTimeout(() => {
+      modal.classList.add(VISIBLE_CSS);
+      wrapper.classList.add(VISIBLE_CSS);
+    }, 100);
+    
+    // modal.classList.add(VISIBLE_CSS);    
 
     return modal;
   };
@@ -760,86 +783,87 @@
   };
 
   // Создал часть формы с ФИО клиента
-  function createClientNameOfModal(lastName, name, surname) {
+  function createClientNameOfModal(surname, name, lastName) {
     const fieldsetClientName = document.createElement('fieldset');
     const wrapperClientName = document.createElement('div');
-    const wrapperLastname = document.createElement('div');
-    const inputLastname = document.createElement('input');
-    const lableLastname = document.createElement('lable');
-    const asterixLastname = document.createElement('span');
+    const wrapperSurname = document.createElement('div');
+    const inputSurname = document.createElement('input');
+    const lableSurname = document.createElement('lable');
+    const asterixSurname = document.createElement('span');
     const wrapperName = document.createElement('div');
     const inputName = document.createElement('input');
     const lableName = document.createElement('lable');
     const asterixName = document.createElement('span');
-    const wrapperSurname = document.createElement('div');
-    const lableSurname = document.createElement('lable');
-    const inputSurname = document.createElement('input');
+    const wrapperLastname = document.createElement('div');
+    const inputLastname = document.createElement('input');
+    const lableLastname = document.createElement('lable');
 
     fieldsetClientName.classList.add('fieldset_reset', 'modal-fullname');
     wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
-    wrapperLastname.classList.add('inputs__wrap');
-    inputLastname.classList.add('input', 'modal__intup');
-    lableLastname.classList.add('modal__lable');
-    asterixLastname.classList.add('lable_asterix');
+    
+    wrapperSurname.classList.add('inputs__wrap');
+    inputSurname.classList.add('input', 'modal__intup');    
+    lableSurname.classList.add('modal__lable');
+    asterixSurname.classList.add('lable_asterix');
     wrapperName.classList.add('inputs__wrap');
     inputName.classList.add('input', 'modal__intup');    
     lableName.classList.add('modal__lable');
     asterixName.classList.add('lable_asterix');
-    wrapperSurname.classList.add('inputs__wrap');
-    inputSurname.classList.add('input', 'modal__intup');    
-    lableSurname.classList.add('modal__lable');
-    
-    inputLastname.setAttribute('id', 'lastname');
-    inputLastname.setAttribute('data-input', 'lastname');
-    inputLastname.setAttribute('type', 'text');
-    inputLastname.setAttribute('name', 'lastname');
-    inputLastname.setAttribute('autofocus', 'true');
-    lableLastname.setAttribute('for', 'lastname');
-    inputName.setAttribute('id', 'name');
-    inputName.setAttribute('data-input', 'name');
-    inputName.setAttribute('type', 'text');
-    inputName.setAttribute('name', 'name');
-    lableName.setAttribute('for', 'name');
+    wrapperLastname.classList.add('inputs__wrap');
+    inputLastname.classList.add('input', 'modal__intup');
+    lableLastname.classList.add('modal__lable');
+
     inputSurname.setAttribute('id', 'surname');
     inputSurname.setAttribute('data-input', 'surname');
     inputSurname.setAttribute('type', 'text');
     inputSurname.setAttribute('name', 'surname');
     lableSurname.setAttribute('for', 'surname');
+    inputName.setAttribute('id', 'name');
+    inputName.setAttribute('data-input', 'name');
+    inputName.setAttribute('type', 'text');
+    inputName.setAttribute('name', 'name');
+    lableName.setAttribute('for', 'name');
+    inputLastname.setAttribute('id', 'lastname');
+    inputLastname.setAttribute('data-input', 'lastname');
+    inputLastname.setAttribute('type', 'text');
+    inputLastname.setAttribute('name', 'lastname');
+    // inputLastname.setAttribute('autofocus', 'true');
+    lableLastname.setAttribute('for', 'lastname');
     
-    lableLastname.textContent = 'Фамилия';
-    asterixLastname.textContent = '*';
+    lableSurname.textContent = 'Фамилия';
+    asterixSurname.textContent = '*';
     lableName.textContent = 'Имя';
     asterixName.textContent = '*';     
-    lableSurname.textContent = 'Отчество';
-
-    if (lastName) {
-      lableLastname.classList.add('modal__lable_up');
-      inputLastname.value = lastName;
-    }
-
-    if (name) {
-      lableName.classList.add('modal__lable_up');
-      inputName.value = name;
-    }
+    lableLastname.textContent = 'Отчество';
 
     if (surname) {
       lableSurname.classList.add('modal__lable_up');
       inputSurname.value = surname;
     };
+    
+    if (name) {
+      lableName.classList.add('modal__lable_up');
+      inputName.value = name;
+    };
+    
+    if (lastName) {
+      lableLastname.classList.add('modal__lable_up');
+      inputLastname.value = lastName;
+    };
 
-    lableLastname.append(asterixLastname);
+    lableSurname.append(asterixSurname);
     lableName.append(asterixName);
-
-    wrapperLastname.append(lableLastname);
-    wrapperLastname.append(inputLastname);
-    wrapperName.append(lableName);
-    wrapperName.append(inputName);
+ 
     wrapperSurname.append(lableSurname);
     wrapperSurname.append(inputSurname);
-
-    wrapperClientName.append(wrapperLastname);
-    wrapperClientName.append(wrapperName);
+    wrapperName.append(lableName);
+    wrapperName.append(inputName);
+    wrapperLastname.append(lableLastname);
+    wrapperLastname.append(inputLastname);
+    
     wrapperClientName.append(wrapperSurname);
+    wrapperClientName.append(wrapperName);
+    wrapperClientName.append(wrapperLastname);
     
     fieldsetClientName.append(wrapperClientName);
 
@@ -1143,21 +1167,23 @@
   };
 
   function getValuesFromModal(modal) {
-    const lastName = modal.querySelector('#lastname').value.trim();
-    const name = modal.querySelector('#name').value.trim();
     const surname = modal.querySelector('#surname').value.trim();
+    const name = modal.querySelector('#name').value.trim();
+    const lastName = modal.querySelector('#lastname').value.trim();
     const contacts = [];
     const itemContacts = modal.querySelectorAll('.modal-contacts__item');
 
     itemContacts.forEach((e) => {
       const type = e.querySelector('.contact-type__button').innerText;
       const value = e.querySelector('.contact-value').value.trim();
+
       const objContact = {
         type,
-        value
+        value,
       };
       contacts.push(objContact);
     });
+
 
     return {
       name,
@@ -1167,9 +1193,64 @@
     };
   };
 
+  // Установка/снятие disabled с полей формы
+  function setDisabledOnElementsOfForm(modal, disabledElements) {
+    const inputModal = modal.querySelectorAll('.modal__intup');
+    const itemContacts = modal.querySelectorAll('.modal-contacts__item');
+    const btnAddContact = modal.querySelector('.modal-addcontact__btn');
+    const btnSubmit = modal.querySelector('.submit-btn');
+    const btnSmall = modal.querySelector('.modal-delete-btn');
+
+    if (disabledElements) {
+      console.log('Установка dis');
+      inputModal.forEach((e) => {
+        e.disabled = true;
+      });
+
+      itemContacts.forEach((e) => {
+        const typeElement = e.querySelector('.contact-type__button');
+        const valueElement = e.querySelector('.contact-value');
+        const btnDeleteContact = e.querySelector('.delete-contact__btn');
+
+        typeElement.disabled = true;
+        valueElement.disabled = true;
+        btnDeleteContact.disabled = true;
+      });     
+      
+      btnAddContact.disabled = true;
+      btnSubmit.disabled = true;
+      btnSmall.disabled = true;
+
+    } else {
+        console.log('Снятие dis');
+        inputModal.forEach((e) => {
+          e.disabled = false;
+        });
+
+        itemContacts.forEach((e) => {
+          const typeElement = e.querySelector('.contact-type__button');
+          const valueElement = e.querySelector('.contact-value');
+          const btnDeleteContact = e.querySelector('.delete-contact__btn');
+      
+          typeElement.disabled = false;
+          valueElement.disabled = false;
+          btnDeleteContact.disabled = false;
+        }); 
+      
+        btnAddContact.disabled = false;
+        btnSubmit.disabled = false;
+        btnSmall.disabled = false;
+      }; 
+  };
+
   // TODO animation Закрываю модалку  
   function onClose(modal) {
-    modal.remove();
+    const wrapper = modal.querySelector('.modal__wrapper');
+    modal.classList.remove(VISIBLE_CSS);
+    wrapper.classList.remove(VISIBLE_CSS);
+    const timeoutId = setTimeout(() => {
+      modal.remove();
+    }, DELAY_TIME);
   };
   
   // Удаляю клиента
@@ -1193,17 +1274,16 @@
 
   // Обработка HTTP ошибок 
   async function httpErrorHandler(response, modal) {
-    let info = null;
+    let info;
     const wrapperError = modal.querySelector('.modal-error');
-    // console.log(wrapperError);
     const spanError = wrapperError.querySelector('.modal-error__text');
 
-    if(response.ok) {
+    if(response.status === 200 || response.status === 201) {
       await updateClientsInTable();
       onClose(modal);
     } else {
       if (structure.type !== 'delete') {
-        if ( response.status > 499 & response.status < 600) {
+        if ( response.status === 500) {
           info = `Данные не сохранены. Ответ сервера - ${response.status}. Ошибка работы сервера.`;
         } else {
           switch(response.status) {
@@ -1211,7 +1291,14 @@
               info = 'Данные не сохранены. Ответ сервера - 404. Не удалось найти запрашиваемую страницую.';
               break;
             case 422:
-              info = 'Данные не сохранены. Ответ сервера - 422. В теле запроса допущена логическая ошибка.';
+              const errors = await response.json();
+              errors.errors.forEach((e) => {
+                if (info) {
+                  info = info + ' <br> ' + e.message;
+                } else {
+                  info = e.message;  
+                }
+              });
               break;
             default:
               info = '"Что-то пошло не так..."';
@@ -1220,7 +1307,8 @@
         };
 
         wrapperError.classList.remove('blocked');
-        spanError.textContent = info;
+        spanError.innerHTML = info;
+
         // TODO Вернуть данные в Блок ошибок
         // const errorElement = createErrorForModal(info);
         // const wrapper = document.querySelector('.modal-contacts');
@@ -1238,7 +1326,7 @@
 
   // Читаем клиентов из базы
   async function fetchGetClients() {
-    // await delay(5000); // TODO Для установления задержки
+    await delay(300); // TODO Для установления задержки
     const response = await fetch(URI);
     const data = await response.json();
     return data;
@@ -1246,7 +1334,7 @@
   
   // Ищем клиентов
   async function fetchSearchClients(search) {
-    // await delay(5000); // TODO Для установления задержки
+    await delay(300); // TODO Для установления задержки
     const url = `${URI}?search=${search}`;
     const pesponse = await fetch(url);
     const data = await pesponse.json();
@@ -1255,6 +1343,7 @@
 
   // Добавляем клиента в базу
   async function fetchAddClient(obj) {
+    await delay(300); // TODO Для установления задержки
     const response = await fetch(URI, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
@@ -1266,18 +1355,31 @@
 
   // Получаем клиента по его ID
   async function fetchGetClientById(id) {
-    const pesponse = await fetch(`${URI}/${id}`);
-    const data = await pesponse.json();
+    await delay(300); // TODO Для установления задержки
+    const response = await fetch(`${URI}/${id}`);
+    // const r = response.json();
+    // console.log(r);
+    const data = await response.json();
+    // console.log(data);
+    // console.log(response.status);
+
+    // console.log(data.errors);
     return data;
+
   };
 
   // Обновляем данные клиента по ID
   async function fetchUpdateClient(obj, id) {
+    await delay(300); // TODO Для установления задержки
     const response = await fetch(`${URI}/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(obj),
     });
+    
+    // const aler = await response.json();
+    // console.log(aler);
+    
     return response;
   };
 
@@ -1332,6 +1434,7 @@
       showTooltips(); 
       
       // Поиск по ФИО
+      
       let timeoutId = null;
       header.input.addEventListener('input', () => {
         clearTimeout(timeoutId);
@@ -1360,6 +1463,10 @@
       addBtn.btn.addEventListener('click', function(e) {
         structure.type = 'new';
         createModalWindow('', structure);
+        // console.log(modal);
+        // timeoutId = setTimeout(() => {
+        //   modal.classList.add(VISIBLE_CSS);
+        // }, 0);
       });
 
     };
