@@ -347,13 +347,14 @@
         structure.type = 'change';
         iconElement.classList.add('load__icon');
         // получил данные из базы о клиенте с id
-        const client = await fetchGetClientById(this.dataset.id);
+        const client = await fetchGetClientById(clientId);
         iconElement.classList.remove('load__icon');
         // Вызвал модалку
         // TODO а здесь нужно проверять на ответ на запрос?
         // if (client.response.status === 200) {
           // debugger;
           createModalWindow(client, structure);
+          document.location.hash = clientId
         // };
       });
     });
@@ -716,21 +717,28 @@
       } else {
         // Собираем данные из формы здесь же можно установить в disabled
         const objOfClient = getValuesFromModal(modal);
-        const iconBtnSubmit = btnsElement.btnSubmit.querySelector('.submit-btn__icon');
-        console.log(iconBtnSubmit);
-        // Ставим лоадер на кнопку
-        iconBtnSubmit.classList.add(VISIBLE_CSS);
-        // Устанавливаем disabled на форму
-        setDisabledOnElementsOfForm(modal, true);
-        if (structure.type == 'new') {
-          await onSave(objOfClient, modal);
-        } else if (structure.type == 'change') {
-          await onUpdate(objOfClient, idValue, modal);
-        };
-        //Убираем лоадер с кнопки
-        iconBtnSubmit.classList.remove(VISIBLE_CSS); 
-        // Снимаем disabled
-        setDisabledOnElementsOfForm(modal);
+
+        // Есть ли ошибки при заполнении формы?
+        if (!objOfClient.textError) {
+          const iconBtnSubmit = btnsElement.btnSubmit.querySelector('.submit-btn__icon');
+          // console.log(iconBtnSubmit);
+          // Ставим лоадер на кнопку
+          iconBtnSubmit.classList.add(VISIBLE_CSS);
+          // Устанавливаем disabled на форму
+          setDisabledOnElementsOfForm(modal, true);
+          if (structure.type == 'new') {
+            await onSave(objOfClient, modal);
+          } else if (structure.type == 'change') {
+            await onUpdate(objOfClient, idValue, modal);
+          };
+          //Убираем лоадер с кнопки
+          iconBtnSubmit.classList.remove(VISIBLE_CSS); 
+          // Снимаем disabled
+          setDisabledOnElementsOfForm(modal);
+        } else {
+          blockError.wrapperError.classList.remove('blocked');
+          blockError.spanError.innerHTML = objOfClient.textError; 
+        }
       };
     });
 
@@ -752,7 +760,9 @@
       wrapper.classList.add(VISIBLE_CSS);
     }, 100);
     
-    // modal.classList.add(VISIBLE_CSS);    
+    // modal.classList.add(VISIBLE_CSS);
+    
+    // document.location.hash = idValue;
 
     return modal;
   };
@@ -867,6 +877,16 @@
     
     fieldsetClientName.append(wrapperClientName);
 
+    // Навешиваю обработчики на inputs для сброса стилизации ошибок
+    inputSurname.addEventListener('input', function(e) {
+      inputSurname.parentNode.classList.remove('border-color_burnt-sienna');
+    });
+
+    inputName.addEventListener('input', function(e) {
+      inputName.parentNode.classList.remove('border-color_burnt-sienna');
+    });
+
+
     // TODO Подъем lables
     showInpunsUnderLables(wrapperClientName);
 
@@ -964,6 +984,11 @@
     contactItem.append(wrapContactType);
     contactItem.append(inputContactValue);
     contactItem.append(btnContactDelete);
+
+    // Вешаю на ipnut слушателя чтобы убрать стили сигнализации об ошибке
+    inputContactValue.addEventListener('input', function(){
+      inputContactValue.classList.remove('border-color_burnt-sienna');
+    });
 
     return contactItem;
   };
@@ -1067,6 +1092,8 @@
   // Отслеживаем клик на кнопке (открыть/закрыть список)
     btnDropdown.addEventListener('click', function(e){
       e.preventDefault();
+      // // Удаляю стили индикации об ошибке
+      // btnDropdown.classList.remove('border-color_burnt-sienna');
       listDropdown.classList.toggle('contact-type__list_visible');
       btnDropdown.classList.toggle('contact-type__button_rotate');
     });
@@ -1075,6 +1102,8 @@
     itemDropdown.forEach((e) => {
       e.addEventListener('click', function(el) {
         el.stopPropagation();
+        // Удаляю стили индикации об ошибке
+        btnDropdown.classList.remove('border-color_burnt-sienna');
         btnDropdown.textContent = this.innerText;
         btnDropdown.focus();
         hidenDropdown(listDropdown, btnDropdown);
@@ -1133,7 +1162,6 @@
       e.stopPropagation();
 
       const contactItem = createContactForModal('');
-      
       listContacts.append(contactItem);
 
       // Добавил новому элементу события для дропдауна
@@ -1167,15 +1195,50 @@
   };
 
   function getValuesFromModal(modal) {
-    const surname = modal.querySelector('#surname').value.trim();
-    const name = modal.querySelector('#name').value.trim();
-    const lastName = modal.querySelector('#lastname').value.trim();
+    let textError = '';
+    const surnameElement = modal.querySelector('#surname');
+    const surname = surnameElement.value.trim();
+    if (!surname) {
+      surnameElement.parentNode.classList.add('border-color_burnt-sienna');
+      textError = 'Введите фамилию клиента';
+    };
+
+    const nameElement = modal.querySelector('#name');
+    const name = nameElement.value.trim();
+    if(!name) {
+      nameElement.parentNode.classList.add('border-color_burnt-sienna');
+      if (textError) {
+        textError = textError + '<br>';
+      }
+      textError = textError + 'Введите имя клиента';
+    };
+    
+    const lastNameElement = modal.querySelector('#lastname');
+    const lastName = lastNameElement.value.trim();
+
     const contacts = [];
     const itemContacts = modal.querySelectorAll('.modal-contacts__item');
 
     itemContacts.forEach((e) => {
-      const type = e.querySelector('.contact-type__button').innerText;
-      const value = e.querySelector('.contact-value').value.trim();
+      const typeElement = e.querySelector('.contact-type__button');
+      const type = typeElement.innerText;
+      if (type === 'Тип контакта') {
+        typeElement.classList.add('border-color_burnt-sienna');
+        if (textError) {
+          textError = textError + '<br>';
+        }
+        textError = textError + 'Установите тип контакта';
+      }
+
+      const valueElement = e.querySelector('.contact-value');
+      const value = valueElement.value.trim();
+      if (!value) {
+        valueElement.classList.add('border-color_burnt-sienna');
+        if (textError) {
+          textError = textError + '<br>';
+        }
+        textError = textError + 'Введите данные контакта';
+      }
 
       const objContact = {
         type,
@@ -1184,12 +1247,14 @@
       contacts.push(objContact);
     });
 
+    console.log(textError);
 
     return {
       name,
       surname,
       lastName,
       contacts,
+      textError,
     };
   };
 
@@ -1243,7 +1308,7 @@
       }; 
   };
 
-  // TODO animation Закрываю модалку  
+  // TODO возможно удалить # из location Закрываю модалку  
   function onClose(modal) {
     const wrapper = modal.querySelector('.modal__wrapper');
     modal.classList.remove(VISIBLE_CSS);
@@ -1251,6 +1316,7 @@
     const timeoutId = setTimeout(() => {
       modal.remove();
     }, DELAY_TIME);
+    document.location.hash = '';
   };
   
   // Удаляю клиента
@@ -1468,6 +1534,15 @@
         //   modal.classList.add(VISIBLE_CSS);
         // }, 0);
       });
+
+      // Если ссылка, открываем модальное
+      if (document.location.hash) {
+        const clientId = document.location.hash.split('#')[1];
+        console.log(clientId)
+        structure.type = 'change';
+        const client = await fetchGetClientById(clientId);
+        createModalWindow(client, structure);
+      };
 
     };
     

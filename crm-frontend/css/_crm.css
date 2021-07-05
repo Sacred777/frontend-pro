@@ -596,6 +596,10 @@ transform: rotate(180deg);
   border-bottom: 1px solid rgba(200, 197, 209, 0.5);
 }
 
+/* .inputs__wrap_bg-color {
+  border-color:  rgba(240, 106, 77, 0.5);
+} */
+
 .modal__intup {
   z-index: 10;
   background: transparent;
@@ -1062,6 +1066,9 @@ transform: rotate(180deg);
   color: var(--light-slate-blue); 
 }
 
+.border-color_burnt-sienna {
+  border-color:  rgba(240, 106, 77, 0.5);
+}
 
 /* --- */
 
