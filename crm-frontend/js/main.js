@@ -282,6 +282,7 @@
       btnDeleteImg.classList.add('actions-btn__icon', 'delete-btn__icon');
       btnDeleteText.classList.add('delete-btn__text');
 
+      tr.setAttribute('id', e.id); // Для поиска клиентов в таблице и скролла к ним
       btnEdit.setAttribute('data-id', e.id);
       btnDelete.setAttribute('data-id', e.id);
 
@@ -1457,6 +1458,7 @@
     return response;
   };
 
+  // Добавление клиентов из базы данных в таблицу
   async function updateClientsInTable() {
     // Заблокировал инпут поиска клиентов 
     const serchInput = document.querySelector('.search-form__input');
@@ -1479,6 +1481,74 @@
     serchInput.disabled = false; 
   };
 
+
+  // Создание списка найденных клиентов
+  function createListItems(clientsArray, list, tableBody) {
+    
+    clientsArray.forEach((e) => {
+      const listItem = document.createElement('li');
+      listItem.classList.add('search__items');
+      listItem.setAttribute('data-id', e.id);
+      listItem.textContent = e.name + ' ' + e.surname;
+      list.append(listItem);
+      
+      // Клик по списку
+      listItem.addEventListener('click', function() {
+        showClientInTable(this.dataset.id, tableBody);
+        clearListOfSearch(list);
+      });
+    });
+    
+    list.classList.remove('blocked');
+    return list;
+  };
+
+  // Установка фокуса на элемент списка поиска клиентов
+  function setFocusOnItem(focusedItem, itemElementArray) {
+    if (focusedItem > itemElementArray.length -1) {
+      focusedItem = 0;
+    };
+    if (focusedItem < 0) {
+      focusedItem = itemElementArray.length -1
+    };
+    unfocusAllItems(itemElementArray);
+    itemElementArray[focusedItem].classList.add('search__items_focused');
+    return focusedItem;
+  };
+
+  // Снятие фокусировок с элементов списка поиска клиентов
+  function unfocusAllItems(itemElementArray) {
+    itemElementArray.forEach((e) => {
+      e.classList.remove('search__items_focused');
+    });
+  };
+  
+
+  // Поиск клиента в таблице по id, подсвечивание и плавный скролл
+  function showClientInTable(clientId) {
+    // Подсветил клиента
+    const trOfClient = document.getElementById(clientId);
+    console.log(trOfClient);
+    trOfClient.classList.add('outline_medium-slate-blue');
+    console.log(trOfClient);
+    // TODO плавный скрол до найденного элемента
+    trOfClient.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  };
+
+// Очистка списка поиска 
+  function clearListOfSearch(list) {
+    list.classList.add('blocked');    
+    const itemsOfList = list.querySelectorAll('.search__items');
+    itemsOfList.forEach((e) => {
+      e.remove();
+    });
+  };
+
+
+
   // Основная функция
   document.addEventListener('DOMContentLoaded', () => {
     async function createApp() {
@@ -1497,30 +1567,72 @@
       await updateClientsInTable();
 
       // Показываю тултипы
-      showTooltips(); 
+      showTooltips();
       
       // Поиск по ФИО
-      
+      // TODO список можно создать даже вначале функции. Создаем список для вывода результатов поиска 
+      const listSearchedValues = document.createElement('ul');
+      listSearchedValues.classList.add('search__list', 'blocked');
+      header.form.append(listSearchedValues);
+
       let timeoutId = null;
+      let listItemsElements = null;
+      let focusedItem = -1;
+
       header.input.addEventListener('input', () => {
+        // TODO Очистить таблицу от подсвеченных клиентов если они были найдены и помечены. Возвращаем таблицу вверх экрана (был или не был скролл). Возможно скролл вначало если инпут очищен 
+        const highlightedItems = tableBody.tableBody.querySelectorAll('.table__row');
+        highlightedItems.forEach((e) => {
+          e.classList.remove('outline_medium-slate-blue');
+        });
+
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {findContacts()}, DELAY_TIME); //TODO попробуй передать аргумент head и insertClientsDataElement
+        timeoutId = setTimeout(() => {findContacts()}, DELAY_TIME);
       });
 
       async function findContacts() { //TODO сюда бы передать header. Ищу клиентов по введенным данным в input
         const inputValue = header.input.value.trim();
+        clearListOfSearch(listSearchedValues);
+
         if (inputValue) {
-          clientsState.clients = await fetchSearchClients(inputValue);
-          if (clientsState.clients.length) {
-            insertClientsData(clientsState);
+          const serchedClients = await fetchSearchClients(inputValue);
+          if (serchedClients.length) {
+            listItemsElements = createListItems(serchedClients, listSearchedValues, tableBody.tableBody).querySelectorAll('.search__items');
           } else {
-            deleteTableRows();
-          };
+            listItemsElements = null;
+          } 
         } else {
-          clientsState.clients = await fetchGetClients();
-          insertClientsData(clientsState);
+        listItemsElements = null;
         };
       };
+
+      // Установливаем обработчик событий на keydown
+      document.addEventListener('keydown', function(e) {
+        if (listItemsElements) {
+          switch (e.key) {
+            case 'Enter': 
+              e.preventDefault();
+              showClientInTable(listItemsElements[focusedItem].dataset.id);
+              clearListOfSearch(listSearchedValues);
+              break;
+            case 'ArrowDown':
+              // console.log('Down');
+              focusedItem++;
+              focusedItem = setFocusOnItem(focusedItem, listItemsElements);
+              console.log(focusedItem);
+              break;
+            case 'ArrowUp':
+              // console.log('Up');
+              focusedItem--;
+              focusedItem = setFocusOnItem(focusedItem, listItemsElements);
+              console.log(focusedItem);
+              break;
+            case 'Escape':
+              clearListOfSearch(listSearchedValues);
+              break;            
+          };  
+        }
+      })
 
       // Сортировка данных в таблице 
       sortDataInTable(clientsState, tableHead.tr);
@@ -1535,7 +1647,7 @@
         // }, 0);
       });
 
-      // Если ссылка, открываем модальное
+      // Если location.hash ссылка, открываем модальное
       if (document.location.hash) {
         const clientId = document.location.hash.split('#')[1];
         console.log(clientId)
