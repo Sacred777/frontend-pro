@@ -220,25 +220,27 @@
 
   // Вставляем данные в таблицу
   function insertClientsData(clientsObject) {
-    let clientsArray = [];
+    const tbodyElement = document.querySelector('tbody');
+    let clients = [];
     switch (clientsObject.columnOfSort) {
       case 'fullname':
-        clientsArray = sortClientsByFullname(clientsObject.clients, clientsObject.stateOfSort.fullname);
+        clients = sortClientsByFullname(clientsObject.clients, clientsObject.stateOfSort.fullname);
         break;
       case 'createdAt':
-        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.createdAt);
+        clients = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.createdAt);
         break;
       case 'updatedAt':
-        clientsArray = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.updatedAt);
+        clients = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.updatedAt);
         break;
       default:
-        clientsArray = sortClientsById(clientsObject.clients, clientsObject.stateOfSort.id);
+        clients = sortClientsById(clientsObject.clients, clientsObject.stateOfSort.id);
     };
 
+    tbodyElement.innerHTML = '';
+    
     markColumnOfSort(clientsObject.columnOfSort, clientsObject.stateOfSort);
 
-    const tbody = deleteTableRows();
-    clientsArray.forEach((e) => {
+    clients.forEach((client) => {
       const tr = document.createElement('tr');
       const tdId = document.createElement('td');
       const tdFullname = document.createElement('td');
@@ -251,7 +253,7 @@
       const updateDate = document.createElement('span');
       const updateTime = document.createElement('span');
       const tdContacts = document.createElement('td');
-      const ulContacts = createContactList(e.contacts);
+      const ulContacts = createContactList(client.contacts);
       const tdActions = document.createElement('td');
       const wrapActions = document.createElement('div');
       const buttonEdit = document.createElement('button');
@@ -282,16 +284,16 @@
       buttonDeleteImg.classList.add('actions-btn__icon', 'delete-btn__icon');
       buttonDeleteText.classList.add('delete-btn__text');
 
-      tr.setAttribute('id', e.id); // Для поиска клиентов в таблице и скролла к ним
-      buttonEdit.setAttribute('data-id', e.id);
-      buttonDelete.setAttribute('data-id', e.id);
+      tr.setAttribute('id', client.id); // Для поиска клиентов в таблице и скролла к ним
+      buttonEdit.setAttribute('data-id', client.id);
+      buttonDelete.setAttribute('data-id', client.id);
 
-      tdId.innerText = e.id.slice(-6);
-      tdFullname.innerText = getFullname(e.surname, e.name, e.lastName);
-      createDate.innerText = formatDate(e.createdAt);
-      createTime.innerText = formatTime(e.createdAt);
-      updateDate.innerText = formatDate(e.updatedAt);
-      updateTime.innerText = formatTime(e.updatedAt);
+      tdId.innerText = client.id.slice(-6);
+      tdFullname.innerText = `${client.surname.trim()} ${client.name.trim()} ${client.lastName.trim()}`;
+      createDate.innerText = formatDate(client.createdAt);
+      createTime.innerText = formatTime(client.createdAt);
+      updateDate.innerText = formatDate(client.updatedAt);
+      updateTime.innerText = formatTime(client.updatedAt);
       buttonEditText.innerText = 'Изменить';
       buttonDeleteText.innerText = 'Удалить';
 
@@ -318,16 +320,16 @@
       tr.append(tdContacts);
       tr.append(tdActions);
 
-      tbody.append(tr);
+      tbodyElement.append(tr);
     });
 
     // Разворот комбинированных контактов
-    showAllContacts(tbody);
+    showAllContacts(tbodyElement);
 
     // Удаление клиента из таблицы
-    const deleteClientButtons = tbody.querySelectorAll('.delete-btn');
-    deleteClientButtons.forEach((e) => {
-      e.addEventListener('click', async function (el) {
+    const deleteClientButtons = tbodyElement.querySelectorAll('.delete-btn');
+    deleteClientButtons.forEach((deleteClientbutton) => {
+      deleteClientbutton.addEventListener('click', async function () {
         const clientId = this.dataset.id;
         // Установил тип окна для модалки 
         modalWindowStructure.type = 'delete';
@@ -339,11 +341,11 @@
     });
 
     // Изменить клиента из таблицы
-    const changeClientButtons = tbody.querySelectorAll('.edit-btn');
-    changeClientButtons.forEach((e) => {
-      e.addEventListener('click', async function (el) {
+    const changeClientButtons = tbodyElement.querySelectorAll('.edit-btn');
+    changeClientButtons.forEach((changeClientButton) => {
+      changeClientButton.addEventListener('click', async function () {
         const clientId = this.dataset.id;
-        const iconElement = e.querySelector('.edit-btn__icon');
+        const iconElement = changeClientButton.querySelector('.edit-btn__icon');
         // Установил тип окна для модалки 
         modalWindowStructure.type = 'change';
         iconElement.classList.add('load__icon');
@@ -360,23 +362,10 @@
       });
     });
 
-    return tbody;
-  };
+    console.log(tbodyElement);
 
-  // Получаем полное имя в одну строку
-  function getFullname(surname, name, lastName) {
-    const nameArray = [];
-    if (surname) {
-      nameArray.push(surname.trim());
-    }
-    if (name) {
-      nameArray.push(name.trim());
-    }
-    if (lastName) {
-      nameArray.push(lastName.trim());
-    }
-    return nameArray.join(' ');
-  }
+    // return tbodyElement;
+  };
 
   // Получаем дату из json
   function formatDate(str) {
@@ -397,7 +386,7 @@
     let i = 1;
 
     contactsArray.forEach(e => {
-      if (i === 5 & arreyLength > 5) {
+      if (i === 5 && arreyLength > 5) {
         const li = document.createElement('li');
         const span = document.createElement('span');
         li.classList.add('contacts__item');
@@ -527,26 +516,17 @@
     });
   };
 
-  // Удаление tbody таблицы и её данные для отображения
-  function deleteTableRows() {
-    const tbody = document.querySelector('tbody');
-    while (tbody.rows.length > 0) {
-      tbody.deleteRow(0);
-    }
-    return tbody;
-  };
-
   // Показываю тултипы [data-type] и [data-value]
   function showTooltips() {
     let tooltipElememt;
     let tooltipTypeElement;
     let tooltipValueElement;
-    document.onmouseover = function (event) {
+    document.addEventListener('mouseover', (event) => {
       let target = event.target;
       let tooltipType = target.dataset.type;
       let tooltipValue = target.dataset.value;
 
-      if (!tooltipType & !tooltipValue) return;
+      if (!tooltipType && !tooltipValue) return;
 
       tooltipElememt = document.createElement('div');
       tooltipValueElement = document.createElement('span');
@@ -580,14 +560,14 @@
       tooltipElememt.style.left = left + 'px';
       tooltipElememt.style.top = top + 'px';
       tooltipElememt.style.opacity = 1;
-    };
+    });
 
-    document.onmouseout = function (e) {
+    document.addEventListener('mouseout', (event) => {
       if (tooltipElememt) {
         tooltipElememt.remove();
         tooltipElememt = null;
       };
-    };
+    });
   };
 
   // Показываю все контакты клинета по нажатию на Comb кнопку
@@ -1541,10 +1521,7 @@
   // Очистка списка поиска 
   function clearListOfSearch(list) {
     list.classList.add('blocked');
-    const itemsOfList = list.querySelectorAll('.search__items');
-    itemsOfList.forEach((e) => {
-      e.remove();
-    });
+    list.innerHTML = '';
   };
 
 
