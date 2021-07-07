@@ -5,12 +5,12 @@
 }
 
 .btn {
+  padding: 2px;
   border: 0;
   border-radius: 0;
-  padding: 2px;
+  color: inherit;
   background: transparent;
   cursor: pointer;
-  color: inherit;
 }
 
 .btn:focus-visible {
@@ -24,15 +24,15 @@
 /* Header */
 .header__container {
   display: flex;
-  height: 90px;
   align-items: center;
+  height: 90px;
   background-color: var(--white);
   box-shadow: 0px 9.03012px 27.0904px rgba(176, 190, 197, 0.32), 0px 3.38629px 5.64383px rgba(176, 190, 197, 0.32);
 }
 
 .logo {
-  margin-left: 2px;
   margin-right: 53px;
+  margin-left: 2px;
   width: 50px;
   height: 50px;
 }
@@ -42,7 +42,6 @@
 }
 
 .search-form__input {
-  /* position: relative; */
   padding-left: 15px;
   width: 581px;
   height: 44px;
@@ -55,31 +54,22 @@
 }
 
 .search__list {
-  /* opacity: 0; */
-  /* visibility: hidden; */
-  z-index: 999;
   position: absolute;
+  z-index: 999;
   top: 45px;
   right: 0;
   bottom: 0;
   left: 0;
-  /* display: block; */
-  /* display: flex; */
   background-color: var(--white-smoke);
 }
 
 .search__items {
-  /* outline: 1px solid grey; */
-  padding-left: 20px;
-  /* opacity: 0.9; */
-  /* outline: 1px solid black; */
   display: inline-block;
+  padding-left: 20px;
   width: 100%;
   height: 40px;
-  color: var(--dark-gray);
   line-height: 40px;
-  /* text-height: 40px; */
-  /* text-align: center; */
+  color: var(--dark-gray);
   background-color: var(--white);
 }
 
@@ -90,8 +80,6 @@
 .search__items_focused {
   background-color: var(--white-smoke);
 }
-
-
 /* --- */
 
 /* Main*/
@@ -101,8 +89,8 @@
 }
 
 .main__title {
-  padding-left: 72px;
   padding-top: 42px;
+  padding-left: 72px;
   font-size: 24px;
   color: var(--night-rider);
 }
@@ -115,8 +103,8 @@
 .table {
   margin: 0 auto;
   width: 100%;
-  border-collapse: collapse;
   table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .table-head__row {
@@ -126,10 +114,10 @@
 .table-head__cells {
   padding-bottom: 6px;
   text-align: left;
-  font-size: 12px;
-  line-height: 16px;
   vertical-align: bottom;
   font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
   color: var(--dark-gray);
 }
 
@@ -137,7 +125,6 @@
 .table__row td:nth-child(1) {
   width: 102px;
 }
-
 
 .table-head__row th:nth-child(2),
 .table__row td:nth-child(2) {
@@ -183,7 +170,6 @@
   transition: color 0.3s ease-in-out;
 }
 
-
 .table-head_id:hover .head-id__title,
 .table-head_fullname:hover .head-fullname__title,
 .table-head_createdate:hover .head-createdate__title,
@@ -207,14 +193,8 @@
 }
 
 .rotate_180 {
-transform: rotate(180deg);
+  transform: rotate(180deg);
 }
-
-.table-head_createdate svg, 
-.table-head_updatedate svg {
-  /* margin-left: -4px; */
-}
-
 
 .head-fullname__descr {
   align-items: center;
@@ -308,9 +288,8 @@ transform: rotate(180deg);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  /* align-content: space-between; */
-  height: 100%;
   padding: 9px 21px 5px 0;
+  height: 100%;
 }
 
 .contacts__item {
@@ -333,18 +312,17 @@ transform: rotate(180deg);
 
 .contacts__icon_ring {
   --ring-size: 16px;
-  margin-bottom: 6px;
   display: inline-block;
+  margin-bottom: 6px;
   width: var(--ring-size);
   height: var(--ring-size);
-  text-align: center;
-  line-height: calc(var(--ring-size) - 2px);
   border-radius: 100%;
   border: 1px solid var(--light-slate-blue);
-  color: var(--night-rider);
-  /* opacity: 0.7; */
+  text-align: center;
   font-weight: 600;
   font-size: 8px;
+  line-height: calc(var(--ring-size) - 2px);
+  color: var(--night-rider);
 }
 
 
@@ -367,20 +345,20 @@ transform: rotate(180deg);
 
 .tooltip__value {
   display: inline-block;
+  font-weight: 700;
   font-size: 12px;
   line-height: 16px;
-  font-weight: 700;
   color: var(--white);
 }
 
 .tooltip::after {
   content: "";
-	border: solid transparent;
 	position: absolute;    
-	left: calc(50% - 5px);    
 	bottom: -9px;
+	left: calc(50% - 5px);    
   width: 0;
 	height: 0;
+	border: solid transparent;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	border-top: 9px solid var(--night-rider);
@@ -394,9 +372,9 @@ transform: rotate(180deg);
 }
 
 .edit-btn {
-  margin-right: 26px;
   display: flex;
   align-items: center;
+  margin-right: 26px;
   transition: color 0.3s ease-in-out;
 }
 
@@ -407,13 +385,12 @@ transform: rotate(180deg);
 
 .actions-btn__icon {
   display: block;
+  margin-right: 1px;
   width: 16px;
   height: 16px;
-  margin-right: 1px;
 }
 
 .edit-btn__icon {
-  /* fill: var(--light-slate-blue); */
   background-image: url(../img/edit.svg);
   background-repeat: no-repeat;
   background-size: contain;
@@ -421,18 +398,13 @@ transform: rotate(180deg);
 
 .load__icon {
   display: block;
+  margin-right: 2px;
   width: 16px;
   height: 16px;
-  margin-right: 2px;
-  /* fill: var(--white); */
   background-image: url(../img/ring_small.svg);
   background-repeat: no-repeat;
   background-size: contain;
   animation: ring-spin var(--speed-ring) infinite linear;
-}
-
-.edit-load__icon {
-  /* stroke: var(--light-slate-blue); */
 }
 
 .delete-btn {
@@ -456,7 +428,6 @@ transform: rotate(180deg);
   stroke: var(--burnt-sienna);
 }
 
-
 /* Кнопка добавить клиента */
 .add-client {
   padding-bottom: 252px;
@@ -468,24 +439,22 @@ transform: rotate(180deg);
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  width: 216px;
   padding: 12px 0 10px 0;
+  border: 1px solid currentColor;
+  width: 216px;
   font-weight: 600;
   font-size: 14px;
   line-height: 19px;
   color: var(--light-slate-blue);
-  border: 1px solid currentColor;
   transition-property: border, color,background-color;
   transition-duration: 0.3s;
   transition-timing-function: ease-in-out;
 }
 
 .add-client__icon {
+  margin-right: 10px; 
   width: 23px;
   height: 16px;
-  margin-right: 10px; 
-  /* fill: var(--light-slate-blue); */
-  /* transition: fill 0.3s ease-in-out; */
   background-image: url(../img/add_client.svg);
   background-repeat: no-repeat;
   background-size: contain;
@@ -495,7 +464,6 @@ transform: rotate(180deg);
 .add-client__btn:hover .add-client__icon {
   color: var(--white);
   background-color: var(--perfume);
-  /* fill: var(--white); */
 }
 
 .add-client__btn:focus,
@@ -503,50 +471,38 @@ transform: rotate(180deg);
   outline: none;
   color: var(--white);
   background-color: var(--perfume);
-  /* fill: var(--white); */
 }
 
 .add-client__btn:active,
 .add-client__btn:active .add-client__icon {
+  border: 1px solid var(--light-slate-blue);
   color: var(--white);
   background-color: var(--medium-slate-blue);
-  border: 1px solid var(--light-slate-blue);
-  /* fill: var(--white); */
 }
 
 .add-client__btn_disabled {
-  /* color: var(--ghost); */
   border: 1px solid var(--ghost);
   cursor: none;
 }
 
 /* Модальные окна */
 .modal {
-  /* display: none; */
-  opacity: 0;
-  visibility: hidden;
-
   position: fixed;
+  z-index: 999;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 999;
-  background-color: rgba(0,0,0, 0.2);
-  /* background-color: var(--white-smoke); */
-  cursor: pointer;
+  visibility: hidden;
   overflow-y: auto;
   overflow-x: hidden;
   text-align: center;
   white-space: nowrap;
   font-size: 0;
-  /* transform: scale(0); */
-  /* transition: transform 0.3s ease-in-out; */
+  opacity: 0;
+  cursor: pointer;
+  background-color: rgba(0,0,0, 0.2);
   transition: opacity 0.3s ease-in-out, visibility 0s ease-in-out 0.3s;
-  /* transition-property: visibility, opacity; */
-  /* transition-duration: 2s; */
-  /* transition-timing-function: ease-in-out; */
-  /* transition: opacity 3s ease-in-out; */
 }
 
 .modal::before {
@@ -558,23 +514,17 @@ transform: rotate(180deg);
 
 .modal__wrapper {
   position: relative;
-  width: 450px;
-  /* width: 0; */
-  /* height: 0; */
-  margin: 0 auto;
   display: inline-block;
-  text-align: left;
+  margin: 0 auto;
+  width: 450px;
   vertical-align: middle;
+  text-align: left;
   background: var(--white);
   box-shadow: 0px 0px 35px rgba(0, 0, 0, 0.15);
-  cursor: default;
   white-space: normal;
+  cursor: default;
   transform: scale(0);
   transition: transform 0.3s ease-in-out;
-}
-
-.modal__wrapper_scale {
-  /* transform: scale(1); */
 }
 
 .modal__close {
@@ -631,29 +581,24 @@ transform: rotate(180deg);
 /* Добавил */
 .inputs__wrap {
   position: relative;
-  padding-bottom: 4px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  height: 36px;
+  padding-bottom: 4px;
   width: 390px;
+  height: 36px;
   border-bottom: 1px solid rgba(200, 197, 209, 0.5);
 }
 
-/* .inputs__wrap_bg-color {
-  border-color:  rgba(240, 106, 77, 0.5);
-} */
-
 .modal__intup {
   z-index: 10;
-  background: transparent;
   border: none;
-  /* outline: none; */
   height: 20px;
   font-weight: 600;
   font-size: 14px;
   line-height: 19px;
   color: var(--night-rider);
+  background: transparent;
   transition: opasity 0.3s ease;
 }
 
@@ -688,12 +633,11 @@ transform: rotate(180deg);
 
 .modal__intup_error:focus {
   border-bottom: 1px solid rgba(240, 106, 77, 0.5);
-} */
+}
 
 
 .modal-contacts {
   display: block;
-  /* margin-bottom: 8px; */
   padding: 8px 0;
   background-color: rgba(200, 197, 209, 0.2);
 }
@@ -710,55 +654,43 @@ transform: rotate(180deg);
 
 .modal-contacts__item {
   display: flex;
-  /* flex-wrap: nowrap; */
   margin-bottom: 15px;
   width: 100%;
 }
 
 .contacts-type {
   position: relative;
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: center; */
-  /* background-color: var(--white-lilac); */
-  /* border: 1px solid #C8C5D1; */
 }
 
 .contact-type__button {
   position: relative;
-  padding: 0 12px;
-  width: 123px;
-  text-align: left;
   display: block;
-  /* background: var(--ghost); */
-  background-color: var(--white-lilac);
+  padding: 0 12px;
   border: 1px solid var(--ghost);
-
+  width: 123px;
+  height: 38px;
+  text-align: left;
   font-size: 12px;
   line-height: 16px;
   color: var(--night-rider);
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: space-between; */
-  height: 38px;
   cursor: pointer;
+  background-color: var(--white-lilac);
 }
 
 .contact-type__button::after {
   --tringle-size: 7px;
   content: "";
   position: absolute;
-  display: block;
-  width: var(--tringle-size);
-  height: var(--tringle-size);
-  /* top: calc(50% - var(--tringle-size)); */
   top: 50%;
   right: 15px;
+  display: block;
   border-width: 0 0 2px 2px;
   border-color: #9873FF;
   border-style: solid;
-  transform: translateY(-50%) rotate(-45deg); /* Вместе с top: 50% вырвнивает по вертикали */
+  width: var(--tringle-size);
+  height: var(--tringle-size);
   pointer-events: none;
+  transform: translateY(-50%) rotate(-45deg); /* Вместе с top: 50% вырвнивает по вертикали */
   transition: transform 0.3s ease-in-out;
 }
 
@@ -767,50 +699,18 @@ transform: rotate(180deg);
   transform: translateY(-50%) rotate(135deg);
 }
 
-.contact-type__title {
-  /* margin-right: 40px; */
-  /* font-size: 12px; */
-  /* line-height: 16px; */
-  /* color: var(--night-rider); */
-}
-
-.contact-type__icon {
-  /* height: 12px; */
-  /* width: 12px; */
-  /* fill: var(--light-slate-blue); */
-  /* background-image: url(../img/arrow_up.svg); */
-  /* background-repeat: no-repeat; */
-  /* background-size: contain; */
-}
-
 /* Выпадающий список */
-.contact-type__dropdown {
-  /* display: none; */
-  /* position: absolute; */
-  /* top: 37px; */
-  /* right: -1px; */
-  /* left: -1px; */
-  /* z-index: 1000; */
-  /* border: 1px solid var(--ghost); */
-  /* border-top: 0; */
-  /* background: var(--magnolia); */
-}
-
 .contact-type__list {
-  display: none;
   position: absolute;
+  z-index: 1000;
   top: 37px;
   left: 0;
-  /* right: -1px; */
-  /* left: -1px; */
-  z-index: 1000;
+  display: none;
+  border: 1px solid var(--ghost);
   width: 100%;
   overflow: hidden;
-  border: 1px solid var(--ghost);
-  /* border-top: 0; */
   background-color: var(--magnolia);
   list-style: none;
-  /* background: var(--magnolia); */
 }
 
 .contact-type__list_visible {
@@ -825,26 +725,25 @@ transform: rotate(180deg);
 }
 
 .contact-type__item:hover {
-  background-color: var(--white-lilac);
   cursor: pointer;
+  background-color: var(--white-lilac);
   transition: background-color 0.3s ease-in-out;
 }
 /* --- */
 
-
 .contact-value {
   padding: 0;
   padding-left: 12px;
-  height: 38px;
   border: 0;
   border-top: 1px solid var(--ghost);
   border-bottom: 1px solid var(--ghost);
   border-radius: 0;
   width: 100%;
+  height: 38px;
+  align-items: center;
   font-weight: 600;
   font-size: 14px;
   line-height: 19px;
-  align-items: center;
   color: var(--night-rider);
   background-color:rgba(200, 197, 209, 0.2);
 }
@@ -864,39 +763,35 @@ transform: rotate(180deg);
 }
 
 .delete-contact__btn {
-  display: none;
+  /* display: none; */
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--ghost);
+  border-radius: 0;
+  border-left: transparent;
   width: 38px;
   height: 38px;
   background-color: var(--white-lilac);
-  border-radius: 0;
-  border: 1px solid var(--ghost);
-  border-left: transparent;
   transition: border 0.3s ease-in-out;
 }
 
 .delete-contact__icon {
   display: block;
-  height: 16px;
   width: 16px;
+  height: 16px;
   background-image: url(../img/delete_gray.svg);
   background-repeat: no-repeat;
   background-size: contain;
-  /* fill: var(--dark-gray); */
-  /* transition: fill 0.3s ease-in-out; */
 }
 
 .delete-contact__btn:hover {
   border: none;
-  /* outline: 1px solid var(--burnt-sienna);  */
   border: 1px solid var(--burnt-sienna);
 }
 
 .delete-contact__btn:hover .delete-contact__icon {
   background-image: url(../img/delete.svg);
-  /* fill: var(--burnt-sienna); */
 }
 
 .delete-contact__btn:focus {
@@ -907,15 +802,14 @@ transform: rotate(180deg);
 
 .delete-contact__btn:focus .delete-contact__icon {
   background-image: url(../img/delete.svg);
-  /* fill: var(--burnt-sienna); */
 }
 
 .modal-addcontact__btn {
   display: flex;
-  margin: 0 auto;
-  padding: 8px 0;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
+  padding: 8px 0;
   cursor: default;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
@@ -956,40 +850,14 @@ transform: rotate(180deg);
   background-image: url(../img/add_contact_hover.svg);
 }
 
-/* .modal-addcontact__btn_disabled {
-  display: flex;
-  margin: 0 auto;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-} */
-
-/* .modal-addcontact__btn_disabled .modal-addcontact__title {
-  color: var(--ghost);
-}
-
-.modal-addcontact__btn_disabled .modal-addcontact__icon {
-  background-image: url(../img/add_contact_disabled.svg);
-} */
-
-/* .modal-addcontact__btn_disabled:hover .modal-addcontact__title {
-  color: var(--ghost);
-  cursor: none;
-}
-
-.modal-addcontact__btn_disabled:hover .modal-addcontact__icon {
-  background-image: url(../img/add_contact_disabled.svg);
-} */
-
-
 .modal-error__text {
   display: block;
   margin: 0 auto;
   margin-bottom: 9px;
   width: 255px;
+  text-align: center;
   font-size: 10px;
   line-height: 14px;
-  text-align: center;
   color: var(--burnt-sienna);
 }
 
@@ -1026,23 +894,17 @@ transform: rotate(180deg);
   background-color: var(--ghost);
 }
 
-
-
-
-/* TODO Не реализовал крутящийся круг */
 .submit-btn__icon {
-  visibility: hidden;
-  opacity: 0;
   position: absolute;
   top: 14px;
   left: 12px;
-  /* display: inline-block; */
+  visibility: hidden;
   width: 16px;
   height: 16px;
   background-image: url(../img/ring_small-white.svg);
   background-repeat: no-repeat;
   background-size: contain;
-  /* transform: translateY(-50%); */
+  opacity: 0;
   animation: ring-spin var(--speed-ring) infinite linear;
 }
 
@@ -1055,14 +917,14 @@ transform: rotate(180deg);
 
 .modal-delete-btn {
   display: block;
-  padding: 1px;
   margin: 0 auto;
   margin-bottom: 25px;
+  padding: 1px;
   width: 112px;
   font-size: 12px;
   line-height: 16px;
-  text-decoration-line: underline;
   color: var(--night-rider);
+  text-decoration-line: underline;
   transition: color 0.3s ease-in-out;
 }
 
@@ -1073,18 +935,6 @@ transform: rotate(180deg);
 .modal-delete-btn:focus {
   color: var(--burnt-sienna);
 }
-
-
-/* Для простого модального окна */
-/* - убираем лишние блоки: 
-      modal-header__id
-      оба fieldset 
-    - добаляем классы 
-      к .modal-header добавляем .modal-header-margin-bottom
-      к .modal-container в блоке .modal-header добавляем .align-center
-      к .modal-header__heading добавляем .modal-header__heading-padding-top
-      к .modal-error__text добавляем .modal-error__text-style
-      */
       
 .modal-header-margin-bottom {
   margin-bottom: 11px;
@@ -1113,10 +963,7 @@ transform: rotate(180deg);
 .border-color_burnt-sienna {
   border-color:  rgba(240, 106, 77, 0.5);
 }
-
 /* --- */
-
-
 
 /* TODO Это для скрытия элементов потом убрать*/
 .blocked {
