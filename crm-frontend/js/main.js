@@ -219,28 +219,31 @@
   };
 
   // Вставляем данные в таблицу
-  function insertClientsData(clientsObject) {
+  function insertClientsData({columnOfSort, stateOfSort, clients}) {
     const tbodyElement = document.querySelector('tbody');
-    let clients = [];
-    switch (clientsObject.columnOfSort) {
+    const {id: typeSortingById, fullname: typeSortingByFullname, createdAt: typeSortingByCreatedAt, updatedAt: typeSortingByUpdatedAt} = stateOfSort;
+
+    let sortedClients = [];
+
+    switch (columnOfSort) {
       case 'fullname':
-        clients = sortClientsByFullname(clientsObject.clients, clientsObject.stateOfSort.fullname);
+        sortedClients = sortClientsByFullname(clients, typeSortingByFullname);
         break;
       case 'createdAt':
-        clients = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.createdAt);
+        sortedClients = sortClientsByDate(clients, columnOfSort, typeSortingByCreatedAt);
         break;
       case 'updatedAt':
-        clients = sortClientsByDate(clientsObject.clients, clientsObject.columnOfSort, clientsObject.stateOfSort.updatedAt);
+        sortedClients = sortClientsByDate(clients, columnOfSort, typeSortingByUpdatedAt);
         break;
       default:
-        clients = sortClientsById(clientsObject.clients, clientsObject.stateOfSort.id);
+        sortedClients = sortClientsById(clients, typeSortingById);
     };
 
     tbodyElement.innerHTML = '';
-    
-    markColumnOfSort(clientsObject.columnOfSort, clientsObject.stateOfSort);
 
-    clients.forEach((client) => {
+    markColumnOfSort(columnOfSort, stateOfSort);
+
+    sortedClients.forEach((client) => {
       const tr = document.createElement('tr');
       const tdId = document.createElement('td');
       const tdFullname = document.createElement('td');
@@ -353,18 +356,11 @@
         const client = await fetchGetClientById(clientId);
         iconElement.classList.remove('load__icon');
         // Вызвал модалку
-        // TODO а здесь нужно проверять на ответ на запрос?
-        // if (client.response.status === 200) {
-        // debugger;
         createModalWindow(client, modalWindowStructure);
         document.location.hash = clientId
         // };
       });
     });
-
-    console.log(tbodyElement);
-
-    // return tbodyElement;
   };
 
   // Получаем дату из json
@@ -378,36 +374,34 @@
   }
 
   // Создаем список контактов клиента
-  function createContactList(contactsArray) {
+  function createContactList(contacts) {
     const ul = document.createElement('ul');
     ul.classList.add('contacts__list');
-    const arreyLength = contactsArray.length;
+    const amountOfContacts = contacts.length;
     let visible = true;
-    let i = 1;
 
-    contactsArray.forEach(e => {
-      if (i === 5 && arreyLength > 5) {
+    contacts.forEach((contact, index) => {
+      if (index === 4 && amountOfContacts > 5) {
         const li = document.createElement('li');
         const span = document.createElement('span');
         li.classList.add('contacts__item');
         span.classList.add('contacts__icon_ring');
         li.setAttribute('id', 'comb');
         span.setAttribute('data-value', 'Развернуть');
-        span.innerText = '+' + (arreyLength - i);
+        span.innerText = '+' + (amountOfContacts -1 - index);
         li.append(span);
         ul.append(li);
         visible = false;
       }
 
-      ul.append(createContactElement(e, visible));
-      ++i;
+      ul.append(createContactItem(contact, visible));
     });
 
     return ul;
   };
 
   // Функция создает li элемент для иконок списка контактов
-  function createContactElement(contact, visible) {
+  function createContactItem(contact, visible) {
     const li = document.createElement('li');
     const img = document.createElement('img');
 
@@ -456,61 +450,61 @@
   // Сортировка данных в таблице в первом аргументе объект, во втоом tableHead.tr
   function sortDataInTable(clientsState, tableHeadElement) {
     const thElements = tableHeadElement.querySelectorAll('.table__column_sort');
-    thElements.forEach((e) => {
-      e.addEventListener('click', function () {
-        clientsState.columnOfSort = e.id;
-        if (clientsState.stateOfSort[e.id]) {
-          clientsState.stateOfSort[e.id] = false;
+    thElements.forEach((thElement) => {
+      thElement.addEventListener('click', function () {
+        clientsState.columnOfSort = thElement.id;
+        if (clientsState.stateOfSort[thElement.id]) {
+          clientsState.stateOfSort[thElement.id] = false;
         } else {
-          clientsState.stateOfSort[e.id] = true;
+          clientsState.stateOfSort[thElement.id] = true;
         };
         insertClientsData(clientsState);
-      })
-    })
-  }
+      });
+    });
+  };
 
   // Сорировка списка клиентов по полю ID
-  function sortClientsById(ClientsArray, ascending) {
+  function sortClientsById(clients, ascending) {
     if (ascending) {
-      return ClientsArray.sort((a, b) => a.id > b.id ? 1 : -1);
+      return clients.sort((a, b) => a.id > b.id ? 1 : -1);
     }
-    return ClientsArray.sort((a, b) => a.id < b.id ? 1 : -1);
+    return clients.sort((a, b) => a.id < b.id ? 1 : -1);
   }
 
   // Сортировка списка клиентов по полю Ф.И.О.
-  function sortClientsByFullname(ClientsArray, ascending) {
+  function sortClientsByFullname(clients, ascending) {
     if (ascending) {
-      return ClientsArray.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() < b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
+      return clients.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() < b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
     }
-    return ClientsArray.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() > b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
+    return clients.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() > b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
   }
 
   // Сорировка списка клиентов по полю Дата и время создания
-  function sortClientsByDate(ClientsArray, field, ascending) {
+  function sortClientsByDate(clients, field, ascending) {
     if (ascending) {
-      return ClientsArray.sort((a, b) => new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1);
+      return clients.sort((a, b) => new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1);
     }
-    return ClientsArray.sort((a, b) => new Date(a[field]).getTime() < new Date(b[field]).getTime() ? 1 : -1);
+    return clients.sort((a, b) => new Date(a[field]).getTime() < new Date(b[field]).getTime() ? 1 : -1);
   }
 
   // Маркировка столбца сортировки
-  function markColumnOfSort(column, sorting) {
+  function markColumnOfSort(columnOfSort, stateOfSort) {
     const columns = document.querySelectorAll('.table__column_sort');
-    columns.forEach((e) => {
-      if (e.id === column) {
-        e.childNodes[0].classList.add('color_light-slate-blue');
+    columns.forEach((column) => {
+      if (column.id === columnOfSort) {
+        column.childNodes[0].classList.add('color_light-slate-blue');
       } else {
-        e.childNodes[0].classList.remove('color_light-slate-blue')
+        column.childNodes[0].classList.remove('color_light-slate-blue')
       };
-      if (sorting[e.id]) {
-        e.childNodes[1].classList.remove('rotate_180');
-        if (e.id === 'fullname') {
-          e.childNodes[2].innerText = 'Я-А';
+      if (stateOfSort[column.id]) {
+        column.childNodes[1].classList.remove('rotate_180');
+        if (column.id === 'fullname') {
+          column.childNodes[2].innerText = 'Я-А';
         };
       } else {
-        e.childNodes[1].classList.add('rotate_180');
-        if (e.id === 'fullname') {
-          e.childNodes[2].innerText = 'А-Я';
+        column.childNodes[1].classList.add('rotate_180');
+        if (column.id === 'fullname') {
+          column.childNodes[2].innerText = 'А-Я';
         };
       };
     });
@@ -555,7 +549,7 @@
       let top = coords.top - tooltipElememt.offsetHeight - 10;
       if (top < 0) { // если подсказка не помещается сверху, то отображать её снизу
         top = coords.top + target.offsetHeight + 10;
-      }
+      };
 
       tooltipElememt.style.left = left + 'px';
       tooltipElememt.style.top = top + 'px';
@@ -572,30 +566,35 @@
 
   // Показываю все контакты клинета по нажатию на Comb кнопку
   function showAllContacts(tbodyElement) {
-    const combElement = tbodyElement.querySelectorAll('#comb');
-    combElement.forEach((e) => {
-      e.addEventListener('click', function () {
-        const contactsElement = e.parentNode.querySelectorAll('.contacts__item');
-        contactsElement.forEach((el) => {
-          if (el.id) {
-            el.classList.add('blocked');
+    const combElements = tbodyElement.querySelectorAll('#comb');
+    combElements.forEach((combElement) => {
+      combElement.addEventListener('click', function () {
+        const contactsElements = combElement.parentNode.querySelectorAll('.contacts__item');
+        contactsElements.forEach((contactsElement) => {
+          if (contactsElement.id) {
+            contactsElement.classList.add('blocked');
           } else {
-            el.classList.remove('blocked');
+            contactsElement.classList.remove('blocked');
           };
         });
       });
     });
-  }
-
+  };
 
 
   // ========= Отрисовка модального окна
   // Собираю модалку
-  function createModalWindow(client) {
+  function createModalWindow(client, modalWindowStructure) {
+    const {id, surname, name, lastName, contacts} = client;
+    const {type: typeOfModal} = modalWindowStructure;
+
+
     // Создал контейнер
     const modal = document.createElement('div');
     const wrapper = document.createElement('div');
     const buttonWindowClose = document.createElement('span');
+
+    
 
     modal.classList.add('modal');
     wrapper.classList.add('modal__wrapper');
@@ -607,8 +606,8 @@
     // Создал шапку модалки header элемент
     // ID передаём только в модалку по изменению данных клиента
     let idValue = null;
-    if (modalWindowStructure.type === 'change') {
-      idValue = client.id;
+    if (typeOfModal === 'change') {
+      idValue = id;
     };
 
     const headerElement = createHeadOfModal(modalWindowStructure.headTitle(), idValue);
@@ -623,13 +622,13 @@
     const blockError = createErrorForModal();
 
     // Создал части формы
-    if (modalWindowStructure.type !== 'delete') {
+    if (typeOfModal !== 'delete') {
       // Создал Блок с ФИО клиента
-      const clietntNameElement = createClientNameOfModal(client.surname, client.name, client.lastName);
+      const clietntNameElement = createClientNameOfModal(surname, name, lastName);
       formElement.append(clietntNameElement);
 
       // Создал Блок с контактами клиента
-      const clientContactsElement = createClientContactsOfModal(client.contacts);
+      const clientContactsElement = createClientContactsForModal(contacts);
       formElement.append(clientContactsElement.fieldsetContacts);
       wrapper.append(formElement);
 
@@ -642,7 +641,7 @@
       // Удаление контакта клиента при нажатии на кнопку
       deleteContact(clientContactsElement.buttonAddContactElement, clientContactsElement.wrapperContacts);
 
-      // Добавил переключатель активна/неактивна кнока "Удалить контакт" при условии наличия данных в инпуте 
+      // Добавил переключатель активна/неактивна кнопка "Удалить контакт" при условии наличия данных в инпуте 
       checkValueInInputs(clientContactsElement.wrapperContacts);
 
       // Добавил Блок Ошибок
@@ -678,39 +677,39 @@
     });
 
     // Клик на иконку закрытия окна
-    buttonWindowClose.addEventListener('click', function (e) {
+    buttonWindowClose.addEventListener('click', function () {
       onClose(modal);
     });
 
     // Клик на оверлей
-    modal.addEventListener('click', function (e) {
-      if (!e.target.classList.contains('modal')) {
+    modal.addEventListener('click', function (event) {
+      if (!event.target.classList.contains('modal')) {
         return;
       }
       onClose(modal);
     });
 
     // Клик на большую кнопку
-    buttonsElement.buttonSubmit.addEventListener('click', async function (e) {
+    buttonsElement.buttonSubmit.addEventListener('click', async function () {
       // e.preventDefault(); TODO как сделать submit?
-      if (modalWindowStructure.type == 'delete') {
-        onDelete(client.id, modal); // Удаляем клиента из базы по ID
+      if (typeOfModal == 'delete') {
+        onDelete(id, modal); // Удаляем клиента из базы по ID
       } else {
         // Собираем данные из формы здесь же можно установить в disabled
-        const objOfClient = getValuesFromModal(modal);
+        const clientValues = getValuesFromModal(modal);
 
         // Есть ли ошибки при заполнении формы?
-        if (!objOfClient.textError) {
+        if (!clientValues.textError) {
           const iconButtonSubmit = buttonsElement.buttonSubmit.querySelector('.submit-btn__icon');
           // console.log(iconBtnSubmit);
           // Ставим лоадер на кнопку
           iconButtonSubmit.classList.add(VISIBLE_CSS);
           // Устанавливаем disabled на форму
           setDisabledOnElementsOfForm(modal, true);
-          if (modalWindowStructure.type == 'new') {
-            await onSave(objOfClient, modal);
-          } else if (modalWindowStructure.type == 'change') {
-            await onUpdate(objOfClient, idValue, modal);
+          if (typeOfModal == 'new') {
+            await onSave(clientValues, modal);
+          } else if (typeOfModal == 'change') {
+            await onUpdate(clientValues, idValue, modal);
           };
           //Убираем лоадер с кнопки
           iconButtonSubmit.classList.remove(VISIBLE_CSS);
@@ -718,17 +717,17 @@
           setDisabledOnElementsOfForm(modal);
         } else {
           blockError.wrapperError.classList.remove('blocked');
-          blockError.spanError.innerHTML = objOfClient.textError;
+          blockError.spanError.innerHTML = clientValues.textError;
         }
       };
     });
 
     // Клик на маленькую кнопку
-    buttonsElement.buttonSmall.addEventListener('click', function (e) {
-      if (modalWindowStructure.type !== 'change') {
+    buttonsElement.buttonSmall.addEventListener('click', function () {
+      if (typeOfModal !== 'change') {
         onClose(modal);
       } else {
-        onDelete(client.id, modal); // Удаляем клиента из базы по ID
+        onDelete(id, modal); // Удаляем клиента из базы по ID
         // onClose(modal); // Закрываем модалку
       };
     });
@@ -892,7 +891,7 @@
   };
 
   // Создал часть формы с контактами клиента
-  function createClientContactsOfModal(contacts) {
+  function createClientContactsForModal(contacts) {
     const fieldsetContacts = document.createElement('fieldset');
     const wrapperContacts = document.createElement('div');
     const listOfContacts = document.createElement('ul');
@@ -1248,7 +1247,7 @@
     const buttonSmall = modal.querySelector('.modal-delete-btn');
 
     if (disabledElements) {
-      console.log('Установка dis');
+      // console.log('Установка dis');
       inputModal.forEach((e) => {
         e.disabled = true;
       });
@@ -1503,7 +1502,6 @@
     });
   };
 
-
   // Поиск клиента в таблице по id, подсвечивание и плавный скролл
   function showClientInTable(clientId) {
     // Подсветил клиента
@@ -1523,8 +1521,6 @@
     list.classList.add('blocked');
     list.innerHTML = '';
   };
-
-
 
   // Основная функция
   document.addEventListener('DOMContentLoaded', () => {
@@ -1617,7 +1613,7 @@
       // Добавляем клиента
       addButton.button.addEventListener('click', function (e) {
         modalWindowStructure.type = 'new';
-        createModalWindow('', modalWindowStructure);
+        createModalWindow('',  modalWindowStructure);
         // console.log(modal);
         // timeoutId = setTimeout(() => {
         //   modal.classList.add(VISIBLE_CSS);

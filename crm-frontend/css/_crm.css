@@ -209,7 +209,7 @@
 }
 
 .table-body {
-  position: relative; /*TODO имеет смысл когда вешием оверлей на загрузку*/
+  position: relative; /*TODO имеет смысл когда вешаем оверлей на загрузку*/
   min-height: 300px;
   background-color: var(--white);
 }
