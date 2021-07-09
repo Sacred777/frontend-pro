@@ -219,9 +219,9 @@
   };
 
   // Вставляем данные в таблицу
-  function insertClientsData({columnOfSort, stateOfSort, clients}) {
+  function insertClientsData({ columnOfSort, stateOfSort, clients }) {
     const tbodyElement = document.querySelector('tbody');
-    const {id: typeSortingById, fullname: typeSortingByFullname, createdAt: typeSortingByCreatedAt, updatedAt: typeSortingByUpdatedAt} = stateOfSort;
+    const { id: typeSortingById, fullname: typeSortingByFullname, createdAt: typeSortingByCreatedAt, updatedAt: typeSortingByUpdatedAt } = stateOfSort;
 
     let sortedClients = [];
 
@@ -388,7 +388,7 @@
         span.classList.add('contacts__icon_ring');
         li.setAttribute('id', 'comb');
         span.setAttribute('data-value', 'Развернуть');
-        span.innerText = '+' + (amountOfContacts -1 - index);
+        span.innerText = '+' + (amountOfContacts - 1 - index);
         li.append(span);
         ul.append(li);
         visible = false;
@@ -581,20 +581,20 @@
     });
   };
 
-
   // ========= Отрисовка модального окна
   // Собираю модалку
   function createModalWindow(client, modalWindowStructure) {
-    const {id, surname, name, lastName, contacts} = client;
-    const {type: typeOfModal} = modalWindowStructure;
+    const { id, surname, name, lastName, contacts } = client;
+    const { type: typeOfModal, buttonSubmit: buttonSubmitText, button: buttonSmallText } = modalWindowStructure;
 
+    // console.log(headTitle());
+    // console.log(modalWindowStructure.headTitle());
+    // console.log(buttonSubmitText());
 
     // Создал контейнер
     const modal = document.createElement('div');
     const wrapper = document.createElement('div');
     const buttonWindowClose = document.createElement('span');
-
-    
 
     modal.classList.add('modal');
     wrapper.classList.add('modal__wrapper');
@@ -624,25 +624,25 @@
     // Создал части формы
     if (typeOfModal !== 'delete') {
       // Создал Блок с ФИО клиента
-      const clietntNameElement = createClientNameOfModal(surname, name, lastName);
+      const clietntNameElement = createClientNameForModal(surname, name, lastName);
       formElement.append(clietntNameElement);
 
       // Создал Блок с контактами клиента
-      const clientContactsElement = createClientContactsForModal(contacts);
-      formElement.append(clientContactsElement.fieldsetContacts);
+      const { fieldsetContacts, buttonAddContactElement, wrapperContacts } = createClientContactsForModal(contacts);
+      formElement.append(fieldsetContacts);
       wrapper.append(formElement);
 
       // Добавил переключатель активна/неактивна кнопка "Добавить контакт" (по кол-ву контактов)
-      disabledButtonAddContact(clientContactsElement.buttonAddContactElement, clientContactsElement.fieldsetContacts);
+      disabledButtonAddContact(buttonAddContactElement, fieldsetContacts);
 
       // Добавление нового клиента при нажатии на кнопку
-      addNewContact(clientContactsElement.buttonAddContactElement, clientContactsElement.wrapperContacts);
+      addNewContact(buttonAddContactElement, wrapperContacts);
 
       // Удаление контакта клиента при нажатии на кнопку
-      deleteContact(clientContactsElement.buttonAddContactElement, clientContactsElement.wrapperContacts);
+      deleteContact(buttonAddContactElement, wrapperContacts);
 
       // Добавил переключатель активна/неактивна кнопка "Удалить контакт" при условии наличия данных в инпуте 
-      checkValueInInputs(clientContactsElement.wrapperContacts);
+      checkValueInInputs(wrapperContacts);
 
       // Добавил Блок Ошибок
       wrapper.append(blockError.wrapperError);
@@ -662,7 +662,7 @@
     };
 
     // Создал блок кнопок
-    const buttonsElement = createButtonsForModal(modalWindowStructure.buttonSubmit(), modalWindowStructure.button());
+    const buttonsElement = createButtonsForModal(buttonSubmitText(), buttonSmallText());
     wrapper.append(buttonsElement.wrapperButtons);
 
     modal.append(wrapper);
@@ -701,9 +701,8 @@
         // Есть ли ошибки при заполнении формы?
         if (!clientValues.textError) {
           const iconButtonSubmit = buttonsElement.buttonSubmit.querySelector('.submit-btn__icon');
-          // console.log(iconBtnSubmit);
           // Ставим лоадер на кнопку
-          iconButtonSubmit.classList.add(VISIBLE_CSS);
+          iconButtonSubmit.classList.add('upload_visible');
           // Устанавливаем disabled на форму
           setDisabledOnElementsOfForm(modal, true);
           if (typeOfModal == 'new') {
@@ -712,9 +711,9 @@
             await onUpdate(clientValues, idValue, modal);
           };
           //Убираем лоадер с кнопки
-          iconButtonSubmit.classList.remove(VISIBLE_CSS);
+          iconButtonSubmit.classList.remove('upload_visible');
           // Снимаем disabled
-          setDisabledOnElementsOfForm(modal);
+          setDisabledOnElementsOfForm(modal, false);
         } else {
           blockError.wrapperError.classList.remove('blocked');
           blockError.spanError.innerHTML = clientValues.textError;
@@ -728,7 +727,6 @@
         onClose(modal);
       } else {
         onDelete(id, modal); // Удаляем клиента из базы по ID
-        // onClose(modal); // Закрываем модалку
       };
     });
 
@@ -739,10 +737,6 @@
       modal.classList.add(VISIBLE_CSS);
       wrapper.classList.add(VISIBLE_CSS);
     }, 100);
-
-    // modal.classList.add(VISIBLE_CSS);
-
-    // document.location.hash = idValue;
 
     return modal;
   };
@@ -773,7 +767,7 @@
   };
 
   // Создал часть формы с ФИО клиента
-  function createClientNameOfModal(surname, name, lastName) {
+  function createClientNameForModal(surname, name, lastName) {
     const fieldsetClientName = document.createElement('fieldset');
     const wrapperClientName = document.createElement('div');
     const wrapperSurname = document.createElement('div');
@@ -817,7 +811,6 @@
     inputLastname.setAttribute('data-input', 'lastname');
     inputLastname.setAttribute('type', 'text');
     inputLastname.setAttribute('name', 'lastname');
-    // inputLastname.setAttribute('autofocus', 'true');
     lableLastname.setAttribute('for', 'lastname');
 
     lableSurname.textContent = 'Фамилия';
@@ -858,11 +851,11 @@
     fieldsetClientName.append(wrapperClientName);
 
     // Навешиваю обработчики на inputs для сброса стилизации ошибок
-    inputSurname.addEventListener('input', function (e) {
+    inputSurname.addEventListener('input', function () {
       inputSurname.parentNode.classList.remove('border-color_burnt-sienna');
     });
 
-    inputName.addEventListener('input', function (e) {
+    inputName.addEventListener('input', function () {
       inputName.parentNode.classList.remove('border-color_burnt-sienna');
     });
 
@@ -875,18 +868,18 @@
 
   // Функция подъёма label если фокус на input
   function showInpunsUnderLables(wrapperClientName) {
-    const inputsFullName = wrapperClientName.querySelectorAll('.inputs__wrap');
-    inputsFullName.forEach((e) => {
-      const inputElement = e.querySelector('.modal__intup');
-      const lableElement = e.querySelector('.modal__lable');
-      inputElement.onfocus = function () {
+    const inputs = wrapperClientName.querySelectorAll('.inputs__wrap');
+    inputs.forEach((input) => {
+      const inputElement = input.querySelector('.modal__intup');
+      const lableElement = input.querySelector('.modal__lable');
+      inputElement.addEventListener('focus', function () {
         lableElement.classList.add('modal__lable_up');
-      };
-      inputElement.onblur = function () {
+      });
+      inputElement.addEventListener('blur', function () {
         if (!inputElement.value) {
           lableElement.classList.remove('modal__lable_up');
         };
-      };
+      });
     });
   };
 
@@ -903,8 +896,8 @@
     wrapperContacts.append(listOfContacts);
 
     if (contacts) {
-      contacts.forEach((el) => {
-        const contactItem = createContactForModal(el);
+      contacts.forEach((contact) => {
+        const contactItem = createContactForModal(contact);
         listOfContacts.append(contactItem);
       });
     };
@@ -943,10 +936,10 @@
 
     buttonContactType.textContent = 'Тип контакта';
 
-    contactsTypes.forEach((e) => {
+    contactsTypes.forEach((contactsType) => {
       const item = document.createElement('li');
       item.classList.add('contact-type__item');
-      item.textContent = e;
+      item.textContent = contactsType;
       listContactTypeDropdown.append(item);
     })
 
@@ -1058,30 +1051,28 @@
   function showDropDown(modalElement) {
     const dropdowns = modalElement.querySelectorAll('.contacts-type');
 
-    dropdowns.forEach((e) => {
-      setEventsOnDropdown(e)
+    dropdowns.forEach((dropdown) => {
+      setEventsOnDropdown(dropdown)
     });
   };
 
   // Добавление слушателей к элементам дропдауна
-  function setEventsOnDropdown(element) {
-    const buttonDropdown = element.querySelector('.contact-type__button');
-    const listDropdown = element.querySelector('.contact-type__list');
-    const itemDropdown = listDropdown.querySelectorAll('.contact-type__item');
+  function setEventsOnDropdown(dropdown) {
+    const buttonDropdown = dropdown.querySelector('.contact-type__button');
+    const listDropdown = dropdown.querySelector('.contact-type__list');
+    const itemsDropdown = listDropdown.querySelectorAll('.contact-type__item');
 
     // Отслеживаем клик на кнопке (открыть/закрыть список)
-    buttonDropdown.addEventListener('click', function (e) {
-      e.preventDefault();
-      // // Удаляю стили индикации об ошибке
-      // btnDropdown.classList.remove('border-color_burnt-sienna');
+    buttonDropdown.addEventListener('click', function (event) {
+      event.preventDefault();
       listDropdown.classList.toggle('contact-type__list_visible');
       buttonDropdown.classList.toggle('contact-type__button_rotate');
     });
 
     // Отслеживаем клик по элементам списка и присваивание значения кнопке
-    itemDropdown.forEach((e) => {
-      e.addEventListener('click', function (el) {
-        el.stopPropagation();
+    itemsDropdown.forEach((item) => {
+      item.addEventListener('click', function (event) {
+        event.stopPropagation();
         // Удаляю стили индикации об ошибке
         buttonDropdown.classList.remove('border-color_burnt-sienna');
         buttonDropdown.textContent = this.innerText;
@@ -1091,15 +1082,15 @@
     });
 
     // Клик снаружи дропдауна. Закрыть дропдаун
-    document.addEventListener('click', function (e) {
-      if (e.target !== buttonDropdown) {
+    document.addEventListener('click', function (event) {
+      if (event.target !== buttonDropdown) {
         hidenDropdown(listDropdown, buttonDropdown);
       };
     });
 
     // Нажатие на Таб или Эскейп. Закрыть дропдаун
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Tab' || e.key === 'Escape') {
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Tab' || event.key === 'Escape') {
         hidenDropdown(listDropdown, buttonDropdown);
       };
     });
@@ -1114,8 +1105,8 @@
   // Добавление события ввода данных в инпуты контактов
   function checkValueInInputs(modalElement) {
     const contacts = modalElement.querySelectorAll('.modal-contacts__item');
-    contacts.forEach((e) => {
-      setEventsOnInput(e);
+    contacts.forEach((contact) => {
+      setEventsOnInput(contact);
     });
   };
 
@@ -1124,8 +1115,8 @@
     const buttonDeleteContact = element.querySelector('.delete-contact__btn');
     const inputContact = element.querySelector('.contact-value');
 
-    element.addEventListener('input', function (e) {
-      e.stopPropagation();
+    element.addEventListener('input', function (event) {
+      event.stopPropagation();
       if (inputContact.value) {
         buttonDeleteContact.classList.remove('blocked');
       } else {
@@ -1137,9 +1128,9 @@
   // Добавляем новый контакт клиенту
   function addNewContact(buttonAddContact, wrapperContacts) {
     const listContacts = wrapperContacts.querySelector('.modal-contacts__list');
-    buttonAddContact.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
+    buttonAddContact.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
 
       const contactItem = createContactForModal('');
       listContacts.append(contactItem);
@@ -1159,21 +1150,23 @@
 
   // Удаляем контакт по кнопке
   function deleteContact(buttonAddContact, wrapperContacts) {
-    const buttonDelete = wrapperContacts.querySelectorAll('.modal-contacts__item');
+    const deleteButtons = wrapperContacts.querySelectorAll('.modal-contacts__item');
 
-    buttonDelete.forEach((e) => {
-      setEventOnButtonDeleteContact(e, buttonAddContact, wrapperContacts);
+    deleteButtons.forEach((deleteButton) => {
+      setEventOnButtonDeleteContact(deleteButton, buttonAddContact, wrapperContacts);
     });
   };
 
+  // Навешиваю событие клик на кнопку удаления контакта
   function setEventOnButtonDeleteContact(element, buttonAddContact, wrapperContacts) {
-    const buttonDelete = element.querySelector('.delete-contact__btn');
-    buttonDelete.addEventListener('click', function () {
+    const deleteButton = element.querySelector('.delete-contact__btn');
+    deleteButton.addEventListener('click', function () {
       element.remove();
       disabledButtonAddContact(buttonAddContact, wrapperContacts);
     });
   };
 
+  // Получаю данные формы модального окна
   function getValuesFromModal(modal) {
     let textError = '';
     const surnameElement = modal.querySelector('#surname');
@@ -1197,10 +1190,10 @@
     const lastName = lastNameElement.value.trim();
 
     const contacts = [];
-    const itemContacts = modal.querySelectorAll('.modal-contacts__item');
+    const contactsItems = modal.querySelectorAll('.modal-contacts__item');
 
-    itemContacts.forEach((e) => {
-      const typeElement = e.querySelector('.contact-type__button');
+    contactsItems.forEach((contactsItem) => {
+      const typeElement = contactsItem.querySelector('.contact-type__button');
       const type = typeElement.innerText;
       if (type === 'Тип контакта') {
         typeElement.classList.add('border-color_burnt-sienna');
@@ -1210,7 +1203,7 @@
         textError = textError + 'Установите тип контакта';
       }
 
-      const valueElement = e.querySelector('.contact-value');
+      const valueElement = contactsItem.querySelector('.contact-value');
       const value = valueElement.value.trim();
       if (!value) {
         valueElement.classList.add('border-color_burnt-sienna');
@@ -1227,8 +1220,6 @@
       contacts.push(objContact);
     });
 
-    console.log(textError);
-
     return {
       name,
       surname,
@@ -1240,22 +1231,21 @@
 
   // Установка/снятие disabled с полей формы
   function setDisabledOnElementsOfForm(modal, disabledElements) {
-    const inputModal = modal.querySelectorAll('.modal__intup');
-    const itemContacts = modal.querySelectorAll('.modal-contacts__item');
+    const modalInputs = modal.querySelectorAll('.modal__intup');
+    const contactsItems = modal.querySelectorAll('.modal-contacts__item');
     const buttonAddContact = modal.querySelector('.modal-addcontact__btn');
     const buttonSubmit = modal.querySelector('.submit-btn');
     const buttonSmall = modal.querySelector('.modal-delete-btn');
 
     if (disabledElements) {
-      // console.log('Установка dis');
-      inputModal.forEach((e) => {
-        e.disabled = true;
+      modalInputs.forEach((modalInput) => {
+        modalInput.disabled = true;
       });
 
-      itemContacts.forEach((e) => {
-        const typeElement = e.querySelector('.contact-type__button');
-        const valueElement = e.querySelector('.contact-value');
-        const buttonDeleteContact = e.querySelector('.delete-contact__btn');
+      contactsItems.forEach((contactsItem) => {
+        const typeElement = contactsItem.querySelector('.contact-type__button');
+        const valueElement = contactsItem.querySelector('.contact-value');
+        const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
 
         typeElement.disabled = true;
         valueElement.disabled = true;
@@ -1267,15 +1257,14 @@
       buttonSmall.disabled = true;
 
     } else {
-      console.log('Снятие dis');
-      inputModal.forEach((e) => {
-        e.disabled = false;
+      modalInputs.forEach((modalInput) => {
+        modalInput.disabled = false;
       });
 
-      itemContacts.forEach((e) => {
-        const typeElement = e.querySelector('.contact-type__button');
-        const valueElement = e.querySelector('.contact-value');
-        const buttonDeleteContact = e.querySelector('.delete-contact__btn');
+      contactsItems.forEach((contactsItem) => {
+        const typeElement = contactsItem.querySelector('.contact-type__button');
+        const valueElement = contactsItem.querySelector('.contact-value');
+        const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
 
         typeElement.disabled = false;
         valueElement.disabled = false;
@@ -1288,7 +1277,7 @@
     };
   };
 
-  // TODO возможно удалить # из location Закрываю модалку  
+  // Закрываю модалку  
   function onClose(modal) {
     const wrapper = modal.querySelector('.modal__wrapper');
     modal.classList.remove(VISIBLE_CSS);
@@ -1307,14 +1296,14 @@
   };
 
   // Добавляю нового клиента 
-  async function onSave(objOfClient, modal) {
-    const response = await fetchAddClient(objOfClient);
+  async function onSave(client, modal) {
+    const response = await fetchAddClient(client);
     httpErrorHandler(response, modal);
   };
 
   // Обновляю данные клиента
-  async function onUpdate(objOfClient, clientId, modal) {
-    const response = await fetchUpdateClient(objOfClient, clientId);
+  async function onUpdate(сlient, clientId, modal) {
+    const response = await fetchUpdateClient(сlient, clientId);
     httpErrorHandler(response, modal);
   };
 
@@ -1354,42 +1343,39 @@
 
         wrapperError.classList.remove('blocked');
         spanError.innerHTML = info;
-
-        // TODO Вернуть данные в Блок ошибок
-        // const errorElement = createErrorForModal(info);
-        // const wrapper = document.querySelector('.modal-contacts');
-        // wrapper.append(errorElement.wrapperError);
       };
     };
   };
 
 
   // ========== Серверная часть
-  // TODO Это убрать. Только для тестов
+  // Задержка для тестов
   const delay = ms => {
     return new Promise(r => setTimeout(() => r(), ms));
   };
 
   // Читаем клиентов из базы
   async function fetchGetClients() {
-    await delay(300); // TODO Для установления задержки
+    await delay(DELAY_TIME); // установка задержки
     const response = await fetch(URI);
     const data = await response.json();
+
     return data;
   };
 
   // Ищем клиентов
   async function fetchSearchClients(search) {
-    await delay(300); // TODO Для установления задержки
+    await delay(DELAY_TIME); // установка задержки
     const url = `${URI}?search=${search}`;
     const pesponse = await fetch(url);
     const data = await pesponse.json();
+
     return data;
   };
 
   // Добавляем клиента в базу
   async function fetchAddClient(obj) {
-    await delay(300); // TODO Для установления задержки
+    await delay(DELAY_TIME); // установка задержки
     const response = await fetch(URI, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
@@ -1401,30 +1387,21 @@
 
   // Получаем клиента по его ID
   async function fetchGetClientById(id) {
-    await delay(300); // TODO Для установления задержки
+    await delay(DELAY_TIME); // установка задержки
     const response = await fetch(`${URI}/${id}`);
-    // const r = response.json();
-    // console.log(r);
     const data = await response.json();
-    // console.log(data);
-    // console.log(response.status);
 
-    // console.log(data.errors);
     return data;
-
   };
 
   // Обновляем данные клиента по ID
   async function fetchUpdateClient(obj, id) {
-    await delay(300); // TODO Для установления задержки
+    await delay(DELAY_TIME); // установка задержки
     const response = await fetch(`${URI}/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(obj),
     });
-
-    // const aler = await response.json();
-    // console.log(aler);
 
     return response;
   };
@@ -1434,6 +1411,7 @@
     const response = await fetch(`${URI}/${id}`, {
       method: "DELETE",
     });
+
     return response;
   };
 
@@ -1445,7 +1423,7 @@
 
     // Показал оверлей
     const tableBodyOverley = document.querySelector('.table-body__overlay');
-    tableBodyOverley.classList.remove('blocked'); //TODO animation
+    tableBodyOverley.classList.remove('blocked');
 
     // Записал данные о клинетах из базы в массив объекта
     clientsState.clients = await fetchGetClients();
@@ -1454,7 +1432,7 @@
     insertClientsData(clientsState);
 
     // Скрыл оверлей
-    tableBodyOverley.classList.add('blocked'); //TODO animation
+    tableBodyOverley.classList.add('blocked');
 
     // Разблокировал инпут поиска клиентов
     serchInput.disabled = false;
@@ -1462,13 +1440,13 @@
 
 
   // Создание списка найденных клиентов
-  function createListItems(clientsArray, list, tableBody) {
+  function createListItems(clients, list, tableBody) {
 
-    clientsArray.forEach((e) => {
+    clients.forEach((client) => {
       const listItem = document.createElement('li');
       listItem.classList.add('search__items');
-      listItem.setAttribute('data-id', e.id);
-      listItem.textContent = e.name + ' ' + e.surname;
+      listItem.setAttribute('data-id', client.id);
+      listItem.textContent = client.name + ' ' + client.surname;
       list.append(listItem);
 
       // Клик по списку
@@ -1479,19 +1457,21 @@
     });
 
     list.classList.remove('blocked');
+
     return list;
   };
 
   // Установка фокуса на элемент списка поиска клиентов
-  function setFocusOnItem(focusedItem, itemElementArray) {
-    if (focusedItem > itemElementArray.length - 1) {
+  function setFocusOnItem(focusedItem, itemElements) {
+    if (focusedItem > itemElements.length - 1) {
       focusedItem = 0;
     };
     if (focusedItem < 0) {
-      focusedItem = itemElementArray.length - 1
+      focusedItem = itemElements.length - 1
     };
-    unfocusAllItems(itemElementArray);
-    itemElementArray[focusedItem].classList.add('search__items_focused');
+    unfocusAllItems(itemElements);
+    itemElements[focusedItem].classList.add('search__items_focused');
+
     return focusedItem;
   };
 
@@ -1506,9 +1486,8 @@
   function showClientInTable(clientId) {
     // Подсветил клиента
     const trOfClient = document.getElementById(clientId);
-    console.log(trOfClient);
     trOfClient.classList.add('outline_medium-slate-blue');
-    console.log(trOfClient);
+
     // TODO плавный скрол до найденного элемента
     trOfClient.scrollIntoView({
       behavior: 'smooth',
@@ -1543,7 +1522,7 @@
       showTooltips();
 
       // Поиск по ФИО
-      // TODO список можно создать даже вначале функции. Создаем список для вывода результатов поиска 
+      // Создаем список для вывода результатов поиска 
       const listSearchedValues = document.createElement('ul');
       listSearchedValues.classList.add('search__list', 'blocked');
       header.form.append(listSearchedValues);
@@ -1553,17 +1532,17 @@
       let focusedItem = -1;
 
       header.input.addEventListener('input', () => {
-        // TODO Очистить таблицу от подсвеченных клиентов если они были найдены и помечены. Возвращаем таблицу вверх экрана (был или не был скролл). Возможно скролл вначало если инпут очищен 
         const highlightedItems = tableBody.tableBody.querySelectorAll('.table__row');
-        highlightedItems.forEach((e) => {
-          e.classList.remove('outline_medium-slate-blue');
+        highlightedItems.forEach((highlightedItem) => {
+          highlightedItem.classList.remove('outline_medium-slate-blue');
         });
 
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => { findContacts() }, DELAY_TIME);
       });
 
-      async function findContacts() { //TODO сюда бы передать header. Ищу клиентов по введенным данным в input
+      // Ищу клиентов по введенным данным в input
+      async function findContacts() {
         const inputValue = header.input.value.trim();
         clearListOfSearch(listSearchedValues);
 
@@ -1573,67 +1552,56 @@
             listItemsElements = createListItems(serchedClients, listSearchedValues, tableBody.tableBody).querySelectorAll('.search__items');
           } else {
             listItemsElements = null;
-          }
+          };
         } else {
           listItemsElements = null;
         };
       };
 
       // Установливаем обработчик событий на keydown
-      document.addEventListener('keydown', function (e) {
+      document.addEventListener('keydown', function (event) {
         if (listItemsElements) {
-          switch (e.key) {
+          switch (event.key) {
             case 'Enter':
-              e.preventDefault();
+              event.preventDefault();
               showClientInTable(listItemsElements[focusedItem].dataset.id);
               clearListOfSearch(listSearchedValues);
               break;
             case 'ArrowDown':
-              // console.log('Down');
               focusedItem++;
               focusedItem = setFocusOnItem(focusedItem, listItemsElements);
               console.log(focusedItem);
               break;
-            case 'ArrowUp':
-              // console.log('Up');
               focusedItem--;
               focusedItem = setFocusOnItem(focusedItem, listItemsElements);
-              console.log(focusedItem);
               break;
             case 'Escape':
               clearListOfSearch(listSearchedValues);
               break;
           };
-        }
-      })
+        };
+      });
 
       // Сортировка данных в таблице 
       sortDataInTable(clientsState, tableHead.tr);
 
       // Добавляем клиента
-      addButton.button.addEventListener('click', function (e) {
+      addButton.button.addEventListener('click', function () {
         modalWindowStructure.type = 'new';
-        createModalWindow('',  modalWindowStructure);
-        // console.log(modal);
-        // timeoutId = setTimeout(() => {
-        //   modal.classList.add(VISIBLE_CSS);
-        // }, 0);
+        createModalWindow('', modalWindowStructure);
       });
 
       // Если location.hash ссылка, открываем модальное
       if (document.location.hash) {
         const clientId = document.location.hash.split('#')[1];
-        console.log(clientId)
         modalWindowStructure.type = 'change';
         const client = await fetchGetClientById(clientId);
         createModalWindow(client, modalWindowStructure);
       };
-
     };
 
     createApp();
 
   });
-
 })();
 

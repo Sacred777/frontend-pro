@@ -981,3 +981,8 @@
 .outline_medium-slate-blue {
   outline: 1px solid var(--medium-slate-blue);
 }
+
+.upload_visible {
+  visibility: visible;
+  opacity: 1;
+}
