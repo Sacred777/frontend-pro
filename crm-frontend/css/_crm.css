@@ -32,7 +32,7 @@
 
 .logo {
   margin-right: 53px;
-  margin-left: 2px;
+  margin-left: 10px;
   width: 50px;
   height: 50px;
 }
@@ -128,12 +128,12 @@
 
 .table-head__row th:nth-child(2),
 .table__row td:nth-child(2) {
-  width: 368px;
+  width: 351px;
 }
 
 .table-head__row th:nth-child(3),
 .table__row td:nth-child(3) {
-  width: 176px;
+  width: 171px;
 }
 
 .table-head__row th:nth-child(4),
@@ -209,7 +209,7 @@
 }
 
 .table-body {
-  position: relative; /*TODO имеет смысл когда вешаем оверлей на загрузку*/
+  position: relative;
   min-height: 300px;
   background-color: var(--white);
 }
@@ -288,7 +288,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 9px 21px 5px 0;
+  padding: 9px 24px 5px 0;
   height: 100%;
 }
 
@@ -965,7 +965,6 @@
 }
 /* --- */
 
-/* TODO Это для скрытия элементов потом убрать*/
 .blocked {
   display: none;
 }

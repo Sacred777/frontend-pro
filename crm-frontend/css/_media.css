@@ -42,7 +42,7 @@
   }
 
   .contacts__list {
-    padding-right: 27px;
+    padding-right: 29px;
   }
 
   .cell-create__wraper {
@@ -150,6 +150,14 @@
     height: 61.1px;
   }
 
+  .cell-create__time {
+    padding-right: 15px;
+  }
+
+  .cell-update__time{
+    padding-right: 15px;
+  }
+
   .edit-btn {
     margin-right: 0;
     padding-bottom: 6px;
@@ -162,7 +170,7 @@
 
 @media (max-width: 930px) {
   .contacts__list {
-    padding-right: 7px;
+    padding-right: 10px;
   }
 }
 
@@ -211,6 +219,10 @@
 
   .head-id__title {
     padding-left: 20px;
+  }
+
+  .contacts__list {
+    padding-right: 0;
   }
 
   .table__box {

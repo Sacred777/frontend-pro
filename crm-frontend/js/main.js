@@ -57,7 +57,7 @@
     const form = document.createElement('form');
     const formInput = document.createElement('input');
 
-    header.classList.add('header', 'container', 'header__container');
+    header.classList.add('header', 'header__container');
     logo.classList.add('logo');
     form.classList.add('search-form');
     formInput.classList.add('input', 'search-form__input');
@@ -662,7 +662,7 @@
     };
 
     // Создал блок кнопок
-    const buttonsElement = createButtonsForModal(buttonSubmitText(), buttonSmallText());
+    const buttonsElement = createButtonsForModal(modalWindowStructure.buttonSubmit(), modalWindowStructure.button());
     wrapper.append(buttonsElement.wrapperButtons);
 
     modal.append(wrapper);
@@ -860,7 +860,7 @@
     });
 
 
-    // TODO Подъем lables
+    // Подъем lables
     showInpunsUnderLables(wrapperClientName);
 
     return fieldsetClientName;
@@ -1488,7 +1488,7 @@
     const trOfClient = document.getElementById(clientId);
     trOfClient.classList.add('outline_medium-slate-blue');
 
-    // TODO плавный скрол до найденного элемента
+    // Плавный скрол до найденного элемента
     trOfClient.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
