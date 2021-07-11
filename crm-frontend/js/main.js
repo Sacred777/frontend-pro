@@ -1,4 +1,4 @@
-(() => {
+(function() {
 
   const DELAY_TIME = 300; //300 мс установлено тех. заданием
   const VISIBLE_CSS = 'visible';
@@ -239,91 +239,14 @@
         sortedClients = sortClientsById(clients, typeSortingById);
     };
 
+    // Очищаю данные о клиентах
     tbodyElement.innerHTML = '';
 
     markColumnOfSort(columnOfSort, stateOfSort);
 
-    sortedClients.forEach((client) => {
-      const tr = document.createElement('tr');
-      const tdId = document.createElement('td');
-      const tdFullname = document.createElement('td');
-      const tdCreateDate = document.createElement('td');
-      const wrapCreateDate = document.createElement('div');
-      const createDate = document.createElement('span');
-      const createTime = document.createElement('span');
-      const tdUpdateDate = document.createElement('td');
-      const wrapUpdateDate = document.createElement('div');
-      const updateDate = document.createElement('span');
-      const updateTime = document.createElement('span');
-      const tdContacts = document.createElement('td');
-      const ulContacts = createContactList(client.contacts);
-      const tdActions = document.createElement('td');
-      const wrapActions = document.createElement('div');
-      const buttonEdit = document.createElement('button');
-      const buttonEditImg = document.createElement('span');
-      const buttonEditText = document.createElement('span');
-      const buttonDelete = document.createElement('button');
-      const buttonDeleteImg = document.createElement('span');
-      const buttonDeleteText = document.createElement('span');
-
-      tr.classList.add('table__row');
-      tdId.classList.add('row__cells', 'body-cells_id');
-      tdFullname.classList.add('row__cells', 'body-cells_fullname');
-      tdCreateDate.classList.add('row__cells');
-      wrapCreateDate.classList.add('cell-create__wrapper');
-      createDate.classList.add('cell-create__date');
-      createTime.classList.add('cell-create__time');
-      tdUpdateDate.classList.add('row__cells');
-      wrapUpdateDate.classList.add('cell-update__wrapper');
-      updateDate.classList.add('cell-update__date');
-      updateTime.classList.add('cell-update__time');
-      tdContacts.classList.add('row__cells');
-      tdActions.classList.add('row__cells');
-      wrapActions.classList.add('actions__wrapper');
-      buttonEdit.classList.add('edit-btn', 'btn');
-      buttonEditImg.classList.add('actions-btn__icon', 'edit-btn__icon');
-      buttonEditText.classList.add('edit-btn__text');
-      buttonDelete.classList.add('delete-btn', 'btn');
-      buttonDeleteImg.classList.add('actions-btn__icon', 'delete-btn__icon');
-      buttonDeleteText.classList.add('delete-btn__text');
-
-      tr.setAttribute('id', client.id); // Для поиска клиентов в таблице и скролла к ним
-      buttonEdit.setAttribute('data-id', client.id);
-      buttonDelete.setAttribute('data-id', client.id);
-
-      tdId.innerText = client.id.slice(-6);
-      tdFullname.innerText = `${client.surname.trim()} ${client.name.trim()} ${client.lastName.trim()}`;
-      createDate.innerText = formatDate(client.createdAt);
-      createTime.innerText = formatTime(client.createdAt);
-      updateDate.innerText = formatDate(client.updatedAt);
-      updateTime.innerText = formatTime(client.updatedAt);
-      buttonEditText.innerText = 'Изменить';
-      buttonDeleteText.innerText = 'Удалить';
-
-      wrapCreateDate.append(createDate);
-      wrapCreateDate.append(createTime);
-      tdCreateDate.append(wrapCreateDate);
-
-      wrapUpdateDate.append(updateDate);
-      wrapUpdateDate.append(updateTime);
-      tdUpdateDate.append(wrapUpdateDate);
-      tdContacts.append(ulContacts);
-      buttonEdit.append(buttonEditImg);
-      buttonEdit.append(buttonEditText);
-      buttonDelete.append(buttonDeleteImg);
-      buttonDelete.append(buttonDeleteText);
-      wrapActions.append(buttonEdit);
-      wrapActions.append(buttonDelete);
-      tdActions.append(wrapActions);
-
-      tr.append(tdId);
-      tr.append(tdFullname);
-      tr.append(tdCreateDate);
-      tr.append(tdUpdateDate);
-      tr.append(tdContacts);
-      tr.append(tdActions);
-
-      tbodyElement.append(tr);
+    // Вставляю данные о клиентах в таблицу
+    sortedClients.forEach(function (client) {
+      tbodyElement.append(createRowWithClientData(client));
     });
 
     // Разворот комбинированных контактов
@@ -331,7 +254,7 @@
 
     // Удаление клиента из таблицы
     const deleteClientButtons = tbodyElement.querySelectorAll('.delete-btn');
-    deleteClientButtons.forEach((deleteClientbutton) => {
+    deleteClientButtons.forEach(function (deleteClientbutton) {
       deleteClientbutton.addEventListener('click', async function () {
         const clientId = this.dataset.id;
         // Установил тип окна для модалки 
@@ -345,7 +268,7 @@
 
     // Изменить клиента из таблицы
     const changeClientButtons = tbodyElement.querySelectorAll('.edit-btn');
-    changeClientButtons.forEach((changeClientButton) => {
+    changeClientButtons.forEach(function (changeClientButton) {
       changeClientButton.addEventListener('click', async function () {
         const clientId = this.dataset.id;
         const iconElement = changeClientButton.querySelector('.edit-btn__icon');
@@ -362,6 +285,90 @@
       });
     });
   };
+
+  // Создаем строку в таблице с данными клиента
+  function createRowWithClientData(client) {
+    const tr = document.createElement('tr');
+    const tdId = document.createElement('td');
+    const tdFullname = document.createElement('td');
+    const tdCreateDate = document.createElement('td');
+    const wrapCreateDate = document.createElement('div');
+    const createDate = document.createElement('span');
+    const createTime = document.createElement('span');
+    const tdUpdateDate = document.createElement('td');
+    const wrapUpdateDate = document.createElement('div');
+    const updateDate = document.createElement('span');
+    const updateTime = document.createElement('span');
+    const tdContacts = document.createElement('td');
+    const ulContacts = createContactList(client.contacts);
+    const tdActions = document.createElement('td');
+    const wrapActions = document.createElement('div');
+    const buttonEdit = document.createElement('button');
+    const buttonEditImg = document.createElement('span');
+    const buttonEditText = document.createElement('span');
+    const buttonDelete = document.createElement('button');
+    const buttonDeleteImg = document.createElement('span');
+    const buttonDeleteText = document.createElement('span');
+
+    tr.classList.add('table__row');
+    tdId.classList.add('row__cells', 'body-cells_id');
+    tdFullname.classList.add('row__cells', 'body-cells_fullname');
+    tdCreateDate.classList.add('row__cells');
+    wrapCreateDate.classList.add('cell-create__wrapper');
+    createDate.classList.add('cell-create__date');
+    createTime.classList.add('cell-create__time');
+    tdUpdateDate.classList.add('row__cells');
+    wrapUpdateDate.classList.add('cell-update__wrapper');
+    updateDate.classList.add('cell-update__date');
+    updateTime.classList.add('cell-update__time');
+    tdContacts.classList.add('row__cells');
+    tdActions.classList.add('row__cells');
+    wrapActions.classList.add('actions__wrapper');
+    buttonEdit.classList.add('edit-btn', 'btn');
+    buttonEditImg.classList.add('actions-btn__icon', 'edit-btn__icon');
+    buttonEditText.classList.add('edit-btn__text');
+    buttonDelete.classList.add('delete-btn', 'btn');
+    buttonDeleteImg.classList.add('actions-btn__icon', 'delete-btn__icon');
+    buttonDeleteText.classList.add('delete-btn__text');
+
+    tr.setAttribute('id', client.id); // Для поиска клиентов в таблице и скролла к ним
+    buttonEdit.setAttribute('data-id', client.id);
+    buttonDelete.setAttribute('data-id', client.id);
+
+    tdId.innerText = client.id.slice(-6);
+    tdFullname.innerText = `${client.surname.trim()} ${client.name.trim()} ${client.lastName.trim()}`;
+    createDate.innerText = formatDate(client.createdAt);
+    createTime.innerText = formatTime(client.createdAt);
+    updateDate.innerText = formatDate(client.updatedAt);
+    updateTime.innerText = formatTime(client.updatedAt);
+    buttonEditText.innerText = 'Изменить';
+    buttonDeleteText.innerText = 'Удалить';
+
+    wrapCreateDate.append(createDate);
+    wrapCreateDate.append(createTime);
+    tdCreateDate.append(wrapCreateDate);
+
+    wrapUpdateDate.append(updateDate);
+    wrapUpdateDate.append(updateTime);
+    tdUpdateDate.append(wrapUpdateDate);
+    tdContacts.append(ulContacts);
+    buttonEdit.append(buttonEditImg);
+    buttonEdit.append(buttonEditText);
+    buttonDelete.append(buttonDeleteImg);
+    buttonDelete.append(buttonDeleteText);
+    wrapActions.append(buttonEdit);
+    wrapActions.append(buttonDelete);
+    tdActions.append(wrapActions);
+
+    tr.append(tdId);
+    tr.append(tdFullname);
+    tr.append(tdCreateDate);
+    tr.append(tdUpdateDate);
+    tr.append(tdContacts);
+    tr.append(tdActions);
+
+    return tr;
+  }
 
   // Получаем дату из json
   function formatDate(str) {
@@ -380,7 +387,7 @@
     const amountOfContacts = contacts.length;
     let visible = true;
 
-    contacts.forEach((contact, index) => {
+    contacts.forEach(function (contact, index) {
       if (index === 4 && amountOfContacts > 5) {
         const li = document.createElement('li');
         const span = document.createElement('span');
@@ -450,7 +457,7 @@
   // Сортировка данных в таблице в первом аргументе объект, во втоом tableHead.tr
   function sortDataInTable(clientsState, tableHeadElement) {
     const thElements = tableHeadElement.querySelectorAll('.table__column_sort');
-    thElements.forEach((thElement) => {
+    thElements.forEach(function (thElement) {
       thElement.addEventListener('click', function () {
         clientsState.columnOfSort = thElement.id;
         if (clientsState.stateOfSort[thElement.id]) {
@@ -466,31 +473,43 @@
   // Сорировка списка клиентов по полю ID
   function sortClientsById(clients, ascending) {
     if (ascending) {
-      return clients.sort((a, b) => a.id > b.id ? 1 : -1);
-    }
-    return clients.sort((a, b) => a.id < b.id ? 1 : -1);
-  }
+      return clients.sort(function (a, b) {
+        return a.id > b.id ? 1 : -1;
+      });
+    };
+    return clients.sort(function (a, b) {
+      return a.id < b.id ? 1 : -1;
+    });
+  };
 
   // Сортировка списка клиентов по полю Ф.И.О.
   function sortClientsByFullname(clients, ascending) {
     if (ascending) {
-      return clients.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() < b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
-    }
-    return clients.sort((a, b) => a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() > b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1);
-  }
+      return clients.sort(function (a, b) {
+        return a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() < b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1;
+      });
+    };
+    return clients.sort(function (a, b) {
+      return a.surname.trim().toLowerCase() + a.name.trim().toLowerCase() + a.lastName.trim().toLowerCase() > b.surname.trim().toLowerCase() + b.name.trim().toLowerCase() + b.lastName.trim().toLowerCase() ? 1 : -1;
+    });
+  };
 
   // Сорировка списка клиентов по полю Дата и время создания
   function sortClientsByDate(clients, field, ascending) {
     if (ascending) {
-      return clients.sort((a, b) => new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1);
-    }
-    return clients.sort((a, b) => new Date(a[field]).getTime() < new Date(b[field]).getTime() ? 1 : -1);
-  }
+      return clients.sort(function (a, b) {
+        return new Date(a[field]).getTime() > new Date(b[field]).getTime() ? 1 : -1;
+      });
+    };
+    return clients.sort(function (a, b) {
+      return new Date(a[field]).getTime() < new Date(b[field]).getTime() ? 1 : -1;
+    });
+  };
 
   // Маркировка столбца сортировки
   function markColumnOfSort(columnOfSort, stateOfSort) {
     const columns = document.querySelectorAll('.table__column_sort');
-    columns.forEach((column) => {
+    columns.forEach(function(column) {
       if (column.id === columnOfSort) {
         column.childNodes[0].classList.add('color_light-slate-blue');
       } else {
@@ -515,7 +534,7 @@
     let tooltipElememt;
     let tooltipTypeElement;
     let tooltipValueElement;
-    document.addEventListener('mouseover', (event) => {
+    document.addEventListener('mouseover', function(event) {
       let target = event.target;
       let tooltipType = target.dataset.type;
       let tooltipValue = target.dataset.value;
@@ -556,7 +575,7 @@
       tooltipElememt.style.opacity = 1;
     });
 
-    document.addEventListener('mouseout', (event) => {
+    document.addEventListener('mouseout', function() {
       if (tooltipElememt) {
         tooltipElememt.remove();
         tooltipElememt = null;
@@ -567,10 +586,10 @@
   // Показываю все контакты клинета по нажатию на Comb кнопку
   function showAllContacts(tbodyElement) {
     const combElements = tbodyElement.querySelectorAll('#comb');
-    combElements.forEach((combElement) => {
+    combElements.forEach(function(combElement) {
       combElement.addEventListener('click', function () {
         const contactsElements = combElement.parentNode.querySelectorAll('.contacts__item');
-        contactsElements.forEach((contactsElement) => {
+        contactsElements.forEach(function(contactsElement) {
           if (contactsElement.id) {
             contactsElement.classList.add('blocked');
           } else {
@@ -586,10 +605,6 @@
   function createModalWindow(client, modalWindowStructure) {
     const { id, surname, name, lastName, contacts } = client;
     const { type: typeOfModal, buttonSubmit: buttonSubmitText, button: buttonSmallText } = modalWindowStructure;
-
-    // console.log(headTitle());
-    // console.log(modalWindowStructure.headTitle());
-    // console.log(buttonSubmitText());
 
     // Создал контейнер
     const modal = document.createElement('div');
@@ -733,7 +748,7 @@
     // Добавил открытие дропдауна при нажатии на кнопку
     showDropDown(modal);
 
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(function() {
       modal.classList.add(VISIBLE_CSS);
       wrapper.classList.add(VISIBLE_CSS);
     }, 100);
@@ -869,19 +884,22 @@
   // Функция подъёма label если фокус на input
   function showInpunsUnderLables(wrapperClientName) {
     const inputs = wrapperClientName.querySelectorAll('.inputs__wrap');
-    inputs.forEach((input) => {
-      const inputElement = input.querySelector('.modal__intup');
-      const lableElement = input.querySelector('.modal__lable');
-      inputElement.addEventListener('focus', function () {
-        lableElement.classList.add('modal__lable_up');
-      });
-      inputElement.addEventListener('blur', function () {
-        if (!inputElement.value) {
-          lableElement.classList.remove('modal__lable_up');
-        };
-      });
-    });
+    inputs.forEach(addListenersOnInput);
   };
+
+  // Добавил обработчики событий на инпут 
+  function addListenersOnInput (input) {
+    const inputElement = input.querySelector('.modal__intup');
+    const lableElement = input.querySelector('.modal__lable');
+    inputElement.addEventListener('focus', function () {
+      lableElement.classList.add('modal__lable_up');
+    });
+    inputElement.addEventListener('blur', function () {
+      if (!inputElement.value) {
+        lableElement.classList.remove('modal__lable_up');
+      };
+    });
+  }; 
 
   // Создал часть формы с контактами клиента
   function createClientContactsForModal(contacts) {
@@ -896,7 +914,7 @@
     wrapperContacts.append(listOfContacts);
 
     if (contacts) {
-      contacts.forEach((contact) => {
+      contacts.forEach(function(contact) {
         const contactItem = createContactForModal(contact);
         listOfContacts.append(contactItem);
       });
@@ -936,7 +954,7 @@
 
     buttonContactType.textContent = 'Тип контакта';
 
-    contactsTypes.forEach((contactsType) => {
+    contactsTypes.forEach(function(contactsType) {
       const item = document.createElement('li');
       item.classList.add('contact-type__item');
       item.textContent = contactsType;
@@ -1051,7 +1069,7 @@
   function showDropDown(modalElement) {
     const dropdowns = modalElement.querySelectorAll('.contacts-type');
 
-    dropdowns.forEach((dropdown) => {
+    dropdowns.forEach(function(dropdown) {
       setEventsOnDropdown(dropdown)
     });
   };
@@ -1070,7 +1088,7 @@
     });
 
     // Отслеживаем клик по элементам списка и присваивание значения кнопке
-    itemsDropdown.forEach((item) => {
+    itemsDropdown.forEach(function(item) {
       item.addEventListener('click', function (event) {
         event.stopPropagation();
         // Удаляю стили индикации об ошибке
@@ -1105,7 +1123,7 @@
   // Добавление события ввода данных в инпуты контактов
   function checkValueInInputs(modalElement) {
     const contacts = modalElement.querySelectorAll('.modal-contacts__item');
-    contacts.forEach((contact) => {
+    contacts.forEach(function(contact) {
       setEventsOnInput(contact);
     });
   };
@@ -1152,7 +1170,7 @@
   function deleteContact(buttonAddContact, wrapperContacts) {
     const deleteButtons = wrapperContacts.querySelectorAll('.modal-contacts__item');
 
-    deleteButtons.forEach((deleteButton) => {
+    deleteButtons.forEach(function(deleteButton) {
       setEventOnButtonDeleteContact(deleteButton, buttonAddContact, wrapperContacts);
     });
   };
@@ -1192,7 +1210,7 @@
     const contacts = [];
     const contactsItems = modal.querySelectorAll('.modal-contacts__item');
 
-    contactsItems.forEach((contactsItem) => {
+    contactsItems.forEach(function(contactsItem) {
       const typeElement = contactsItem.querySelector('.contact-type__button');
       const type = typeElement.innerText;
       if (type === 'Тип контакта') {
@@ -1238,11 +1256,11 @@
     const buttonSmall = modal.querySelector('.modal-delete-btn');
 
     if (disabledElements) {
-      modalInputs.forEach((modalInput) => {
+      modalInputs.forEach(function(modalInput) {
         modalInput.disabled = true;
       });
 
-      contactsItems.forEach((contactsItem) => {
+      contactsItems.forEach(function(contactsItem) {
         const typeElement = contactsItem.querySelector('.contact-type__button');
         const valueElement = contactsItem.querySelector('.contact-value');
         const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
@@ -1257,11 +1275,11 @@
       buttonSmall.disabled = true;
 
     } else {
-      modalInputs.forEach((modalInput) => {
+      modalInputs.forEach(function(modalInput) {
         modalInput.disabled = false;
       });
 
-      contactsItems.forEach((contactsItem) => {
+      contactsItems.forEach(function(contactsItem) {
         const typeElement = contactsItem.querySelector('.contact-type__button');
         const valueElement = contactsItem.querySelector('.contact-value');
         const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
@@ -1282,7 +1300,7 @@
     const wrapper = modal.querySelector('.modal__wrapper');
     modal.classList.remove(VISIBLE_CSS);
     wrapper.classList.remove(VISIBLE_CSS);
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(function() {
       modal.remove();
     }, DELAY_TIME);
     document.location.hash = '';
@@ -1327,11 +1345,11 @@
               break;
             case 422:
               const errors = await response.json();
-              errors.errors.forEach((e) => {
+              errors.errors.forEach(function(error) {
                 if (info) {
-                  info = info + ' <br> ' + e.message;
+                  info = info + ' <br> ' + error.message;
                 } else {
-                  info = e.message;
+                  info = error.message;
                 }
               });
               break;
@@ -1442,7 +1460,7 @@
   // Создание списка найденных клиентов
   function createListItems(clients, list, tableBody) {
 
-    clients.forEach((client) => {
+    clients.forEach(function(client) {
       const listItem = document.createElement('li');
       listItem.classList.add('search__items');
       listItem.setAttribute('data-id', client.id);
@@ -1476,9 +1494,9 @@
   };
 
   // Снятие фокусировок с элементов списка поиска клиентов
-  function unfocusAllItems(itemElementArray) {
-    itemElementArray.forEach((e) => {
-      e.classList.remove('search__items_focused');
+  function unfocusAllItems(itemElements) {
+    itemElements.forEach(function(itemElement) {
+      itemElement.classList.remove('search__items_focused');
     });
   };
 
@@ -1502,7 +1520,7 @@
   };
 
   // Основная функция
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', function() {
     async function createApp() {
       const container = document.getElementById('crm-app');
       const header = createHeader(); //Создаю шапку сайта с лого и поиском
@@ -1531,14 +1549,14 @@
       let listItemsElements = null;
       let focusedItem = -1;
 
-      header.input.addEventListener('input', () => {
+      header.input.addEventListener('input', function() {
         const highlightedItems = tableBody.tableBody.querySelectorAll('.table__row');
-        highlightedItems.forEach((highlightedItem) => {
+        highlightedItems.forEach(function(highlightedItem) {
           highlightedItem.classList.remove('outline_medium-slate-blue');
         });
 
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => { findContacts() }, DELAY_TIME);
+        timeoutId = setTimeout(function() { findContacts() }, DELAY_TIME);
       });
 
       // Ищу клиентов по введенным данным в input
@@ -1570,8 +1588,8 @@
             case 'ArrowDown':
               focusedItem++;
               focusedItem = setFocusOnItem(focusedItem, listItemsElements);
-              console.log(focusedItem);
               break;
+            case 'ArrowUp':
               focusedItem--;
               focusedItem = setFocusOnItem(focusedItem, listItemsElements);
               break;
