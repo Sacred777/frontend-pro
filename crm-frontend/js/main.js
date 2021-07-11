@@ -357,7 +357,7 @@
         iconElement.classList.remove('load__icon');
         // Вызвал модалку
         createModalWindow(client, modalWindowStructure);
-        document.location.hash = clientId
+        document.location.hash = 'id_' + clientId;
         // };
       });
     });
@@ -1593,7 +1593,7 @@
 
       // Если location.hash ссылка, открываем модальное
       if (document.location.hash) {
-        const clientId = document.location.hash.split('#')[1];
+        const clientId = document.location.hash.split('_')[1];
         modalWindowStructure.type = 'change';
         const client = await fetchGetClientById(clientId);
         createModalWindow(client, modalWindowStructure);
