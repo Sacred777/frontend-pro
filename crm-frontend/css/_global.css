@@ -2,6 +2,7 @@
 
 html {
   box-sizing: border-box;
+  height: 100%;
 }
 
 *,
@@ -13,6 +14,7 @@ html {
 /* Заполнить font-name наименованием основного шрифта в проекте */
 body {
   margin: 0;
+  height: 100%;
   font-family: 'Open Sans', sans-serif;
   font-style: normal;
   font-weight: 400;

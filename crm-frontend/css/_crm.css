@@ -1,3 +1,7 @@
+#crm-app {
+  background-color: var(--white-smoke);
+}
+
 .container {
   margin: 0 auto;
   padding: 0 10px;
@@ -83,11 +87,6 @@
 /* --- */
 
 /* Main*/
-.main__container {
-  padding: 0 10px;
-  background-color: var(--white-smoke);
-}
-
 .main__title {
   padding-top: 42px;
   padding-left: 72px;
@@ -311,17 +310,16 @@
 }
 
 .contacts__icon_ring {
-  --ring-size: 16px;
   display: inline-block;
   margin-bottom: 6px;
-  width: var(--ring-size);
-  height: var(--ring-size);
+  width: 16px;
+  height: 16px;
   border-radius: 100%;
   border: 1px solid var(--light-slate-blue);
   text-align: center;
   font-weight: 600;
   font-size: 8px;
-  line-height: calc(var(--ring-size) - 2px);
+  line-height: 14px;
   color: var(--night-rider);
 }
 
@@ -575,7 +573,7 @@
 }
 
 .modal-fullname {
-  padding-bottom: 25px;
+  padding-bottom: 9px;
 }
 
 /* Добавил */
@@ -584,6 +582,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  margin-bottom: 16px;
   padding-bottom: 4px;
   width: 390px;
   height: 36px;
@@ -599,7 +598,7 @@
   line-height: 19px;
   color: var(--night-rider);
   background: transparent;
-  transition: opasity 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .modal__lable {
@@ -638,18 +637,17 @@
 
 .modal-contacts {
   display: block;
-  padding: 8px 0;
   background-color: rgba(200, 197, 209, 0.2);
+}
+
+.modal-contacts_padding {
+  padding: 24px 0 16px 0;
 }
 
 .modal-contacts_flex {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.modal-contacts__list {
-  margin-bottom: 15px;
 }
 
 .modal-contacts__item {
@@ -678,7 +676,6 @@
 }
 
 .contact-type__button::after {
-  --tringle-size: 7px;
   content: "";
   position: absolute;
   top: 50%;
@@ -754,8 +751,13 @@
   color: var(--dark-gray);  
 }
 
+.contact-value:focus-visible {
+  outline: 0;
+  border: 1px solid rgba(51, 51, 51, 0.5);
+}
+
 .contact-value:focus {
-  border:0
+  border: 1px solid rgba(51, 51, 51, 0.5);
 }
 
 .contact-value_border-right {
@@ -763,7 +765,6 @@
 }
 
 .delete-contact__btn {
-  /* display: none; */
   display: flex;
   align-items: center;
   justify-content: center;

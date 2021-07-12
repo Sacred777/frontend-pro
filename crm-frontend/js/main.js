@@ -1,4 +1,4 @@
-(function() {
+(function () {
 
   const DELAY_TIME = 300; //300 мс установлено тех. заданием
   const VISIBLE_CSS = 'visible';
@@ -104,7 +104,7 @@
     const headThContacts = document.createElement('th');
     const headThActions = document.createElement('th');
 
-    main.classList.add('main__container', 'container');
+    main.classList.add('container');
     title.classList.add('main__title');
     tableBox.classList.add('table__box');
     table.classList.add('table');
@@ -509,7 +509,7 @@
   // Маркировка столбца сортировки
   function markColumnOfSort(columnOfSort, stateOfSort) {
     const columns = document.querySelectorAll('.table__column_sort');
-    columns.forEach(function(column) {
+    columns.forEach(function (column) {
       if (column.id === columnOfSort) {
         column.childNodes[0].classList.add('color_light-slate-blue');
       } else {
@@ -534,7 +534,7 @@
     let tooltipElememt;
     let tooltipTypeElement;
     let tooltipValueElement;
-    document.addEventListener('mouseover', function(event) {
+    document.addEventListener('mouseover', function (event) {
       let target = event.target;
       let tooltipType = target.dataset.type;
       let tooltipValue = target.dataset.value;
@@ -575,7 +575,7 @@
       tooltipElememt.style.opacity = 1;
     });
 
-    document.addEventListener('mouseout', function() {
+    document.addEventListener('mouseout', function () {
       if (tooltipElememt) {
         tooltipElememt.remove();
         tooltipElememt = null;
@@ -586,10 +586,10 @@
   // Показываю все контакты клинета по нажатию на Comb кнопку
   function showAllContacts(tbodyElement) {
     const combElements = tbodyElement.querySelectorAll('#comb');
-    combElements.forEach(function(combElement) {
+    combElements.forEach(function (combElement) {
       combElement.addEventListener('click', function () {
         const contactsElements = combElement.parentNode.querySelectorAll('.contacts__item');
-        contactsElements.forEach(function(contactsElement) {
+        contactsElements.forEach(function (contactsElement) {
           if (contactsElement.id) {
             contactsElement.classList.add('blocked');
           } else {
@@ -748,13 +748,27 @@
     // Добавил открытие дропдауна при нажатии на кнопку
     showDropDown(modal);
 
-    const timeoutId = setTimeout(function() {
+    const timeoutId = setTimeout(function () {
       modal.classList.add(VISIBLE_CSS);
       wrapper.classList.add(VISIBLE_CSS);
     }, 100);
 
     return modal;
   };
+
+  // Проверка наличия контактов и добавления в блок паддингов
+  function setPaddingToContacrsWrap() {
+    const contactsWrap = document.querySelector('.modal-contacts');
+    if (contactsWrap) {
+      const contactsElements = contactsWrap.querySelectorAll('.modal-contacts__item');
+      if (!contactsElements.length) {
+        contactsWrap.classList.remove('modal-contacts_padding');
+      } else {
+        contactsWrap.classList.add('modal-contacts_padding');
+      };
+    }; 
+  };
+
 
   // Шапка модалки
   function createHeadOfModal(title, idValue) {
@@ -888,7 +902,7 @@
   };
 
   // Добавил обработчики событий на инпут 
-  function addListenersOnInput (input) {
+  function addListenersOnInput(input) {
     const inputElement = input.querySelector('.modal__intup');
     const lableElement = input.querySelector('.modal__lable');
     inputElement.addEventListener('focus', function () {
@@ -899,7 +913,7 @@
         lableElement.classList.remove('modal__lable_up');
       };
     });
-  }; 
+  };
 
   // Создал часть формы с контактами клиента
   function createClientContactsForModal(contacts) {
@@ -914,11 +928,14 @@
     wrapperContacts.append(listOfContacts);
 
     if (contacts) {
-      contacts.forEach(function(contact) {
+      contacts.forEach(function (contact) {
         const contactItem = createContactForModal(contact);
         listOfContacts.append(contactItem);
       });
     };
+
+    // Стилизация блока контактов
+    setTimeout(setPaddingToContacrsWrap, 300);
 
     // Кнопка добавить клиента    
     const buttonAddContactElement = createButtonAddContactForModal();
@@ -954,7 +971,7 @@
 
     buttonContactType.textContent = 'Тип контакта';
 
-    contactsTypes.forEach(function(contactsType) {
+    contactsTypes.forEach(function (contactsType) {
       const item = document.createElement('li');
       item.classList.add('contact-type__item');
       item.textContent = contactsType;
@@ -1069,7 +1086,7 @@
   function showDropDown(modalElement) {
     const dropdowns = modalElement.querySelectorAll('.contacts-type');
 
-    dropdowns.forEach(function(dropdown) {
+    dropdowns.forEach(function (dropdown) {
       setEventsOnDropdown(dropdown)
     });
   };
@@ -1088,7 +1105,7 @@
     });
 
     // Отслеживаем клик по элементам списка и присваивание значения кнопке
-    itemsDropdown.forEach(function(item) {
+    itemsDropdown.forEach(function (item) {
       item.addEventListener('click', function (event) {
         event.stopPropagation();
         // Удаляю стили индикации об ошибке
@@ -1123,7 +1140,7 @@
   // Добавление события ввода данных в инпуты контактов
   function checkValueInInputs(modalElement) {
     const contacts = modalElement.querySelectorAll('.modal-contacts__item');
-    contacts.forEach(function(contact) {
+    contacts.forEach(function (contact) {
       setEventsOnInput(contact);
     });
   };
@@ -1153,6 +1170,9 @@
       const contactItem = createContactForModal('');
       listContacts.append(contactItem);
 
+      // Стилизация блока контактов
+      setPaddingToContacrsWrap();
+
       // Добавил новому элементу события для дропдауна
       setEventsOnDropdown(contactItem);
 
@@ -1170,7 +1190,7 @@
   function deleteContact(buttonAddContact, wrapperContacts) {
     const deleteButtons = wrapperContacts.querySelectorAll('.modal-contacts__item');
 
-    deleteButtons.forEach(function(deleteButton) {
+    deleteButtons.forEach(function (deleteButton) {
       setEventOnButtonDeleteContact(deleteButton, buttonAddContact, wrapperContacts);
     });
   };
@@ -1181,6 +1201,8 @@
     deleteButton.addEventListener('click', function () {
       element.remove();
       disabledButtonAddContact(buttonAddContact, wrapperContacts);
+      // // Стилизация блока контактов
+      setPaddingToContacrsWrap();
     });
   };
 
@@ -1210,7 +1232,7 @@
     const contacts = [];
     const contactsItems = modal.querySelectorAll('.modal-contacts__item');
 
-    contactsItems.forEach(function(contactsItem) {
+    contactsItems.forEach(function (contactsItem) {
       const typeElement = contactsItem.querySelector('.contact-type__button');
       const type = typeElement.innerText;
       if (type === 'Тип контакта') {
@@ -1256,11 +1278,11 @@
     const buttonSmall = modal.querySelector('.modal-delete-btn');
 
     if (disabledElements) {
-      modalInputs.forEach(function(modalInput) {
+      modalInputs.forEach(function (modalInput) {
         modalInput.disabled = true;
       });
 
-      contactsItems.forEach(function(contactsItem) {
+      contactsItems.forEach(function (contactsItem) {
         const typeElement = contactsItem.querySelector('.contact-type__button');
         const valueElement = contactsItem.querySelector('.contact-value');
         const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
@@ -1275,11 +1297,11 @@
       buttonSmall.disabled = true;
 
     } else {
-      modalInputs.forEach(function(modalInput) {
+      modalInputs.forEach(function (modalInput) {
         modalInput.disabled = false;
       });
 
-      contactsItems.forEach(function(contactsItem) {
+      contactsItems.forEach(function (contactsItem) {
         const typeElement = contactsItem.querySelector('.contact-type__button');
         const valueElement = contactsItem.querySelector('.contact-value');
         const buttonDeleteContact = contactsItem.querySelector('.delete-contact__btn');
@@ -1300,7 +1322,7 @@
     const wrapper = modal.querySelector('.modal__wrapper');
     modal.classList.remove(VISIBLE_CSS);
     wrapper.classList.remove(VISIBLE_CSS);
-    const timeoutId = setTimeout(function() {
+    const timeoutId = setTimeout(function () {
       modal.remove();
     }, DELAY_TIME);
     document.location.hash = '';
@@ -1345,7 +1367,7 @@
               break;
             case 422:
               const errors = await response.json();
-              errors.errors.forEach(function(error) {
+              errors.errors.forEach(function (error) {
                 if (info) {
                   info = info + ' <br> ' + error.message;
                 } else {
@@ -1460,7 +1482,7 @@
   // Создание списка найденных клиентов
   function createListItems(clients, list, tableBody) {
 
-    clients.forEach(function(client) {
+    clients.forEach(function (client) {
       const listItem = document.createElement('li');
       listItem.classList.add('search__items');
       listItem.setAttribute('data-id', client.id);
@@ -1495,7 +1517,7 @@
 
   // Снятие фокусировок с элементов списка поиска клиентов
   function unfocusAllItems(itemElements) {
-    itemElements.forEach(function(itemElement) {
+    itemElements.forEach(function (itemElement) {
       itemElement.classList.remove('search__items_focused');
     });
   };
@@ -1520,7 +1542,7 @@
   };
 
   // Основная функция
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     async function createApp() {
       const container = document.getElementById('crm-app');
       const header = createHeader(); //Создаю шапку сайта с лого и поиском
@@ -1549,14 +1571,14 @@
       let listItemsElements = null;
       let focusedItem = -1;
 
-      header.input.addEventListener('input', function() {
+      header.input.addEventListener('input', function () {
         const highlightedItems = tableBody.tableBody.querySelectorAll('.table__row');
-        highlightedItems.forEach(function(highlightedItem) {
+        highlightedItems.forEach(function (highlightedItem) {
           highlightedItem.classList.remove('outline_medium-slate-blue');
         });
 
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(function() { findContacts() }, DELAY_TIME);
+        timeoutId = setTimeout(function () { findContacts() }, DELAY_TIME);
       });
 
       // Ищу клиентов по введенным данным в input
