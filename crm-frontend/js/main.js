@@ -801,76 +801,76 @@
     const wrapperClientName = document.createElement('div');
     const wrapperSurname = document.createElement('div');
     const inputSurname = document.createElement('input');
-    const lableSurname = document.createElement('lable');
+    const labelSurname = document.createElement('label');
     const asterixSurname = document.createElement('span');
     const wrapperName = document.createElement('div');
     const inputName = document.createElement('input');
-    const lableName = document.createElement('lable');
+    const labelName = document.createElement('label');
     const asterixName = document.createElement('span');
     const wrapperLastname = document.createElement('div');
     const inputLastname = document.createElement('input');
-    const lableLastname = document.createElement('lable');
+    const labelLastname = document.createElement('label');
 
     fieldsetClientName.classList.add('fieldset_reset', 'modal-fullname');
     wrapperClientName.classList.add('modal__container', 'modal-contaiter_position_flex');
 
     wrapperSurname.classList.add('inputs__wrap');
     inputSurname.classList.add('input', 'modal__intup');
-    lableSurname.classList.add('modal__lable');
-    asterixSurname.classList.add('lable_asterix');
+    labelSurname.classList.add('modal__label');
+    asterixSurname.classList.add('label_asterix');
     wrapperName.classList.add('inputs__wrap');
     inputName.classList.add('input', 'modal__intup');
-    lableName.classList.add('modal__lable');
-    asterixName.classList.add('lable_asterix');
+    labelName.classList.add('modal__label');
+    asterixName.classList.add('label_asterix');
     wrapperLastname.classList.add('inputs__wrap');
     inputLastname.classList.add('input', 'modal__intup');
-    lableLastname.classList.add('modal__lable');
+    labelLastname.classList.add('modal__label');
 
     inputSurname.setAttribute('id', 'surname');
     inputSurname.setAttribute('data-input', 'surname');
     inputSurname.setAttribute('type', 'text');
     inputSurname.setAttribute('name', 'surname');
-    lableSurname.setAttribute('for', 'surname');
+    labelSurname.setAttribute('for', 'surname');
     inputName.setAttribute('id', 'name');
     inputName.setAttribute('data-input', 'name');
     inputName.setAttribute('type', 'text');
     inputName.setAttribute('name', 'name');
-    lableName.setAttribute('for', 'name');
+    labelName.setAttribute('for', 'name');
     inputLastname.setAttribute('id', 'lastname');
     inputLastname.setAttribute('data-input', 'lastname');
     inputLastname.setAttribute('type', 'text');
     inputLastname.setAttribute('name', 'lastname');
-    lableLastname.setAttribute('for', 'lastname');
+    labelLastname.setAttribute('for', 'lastname');
 
-    lableSurname.textContent = 'Фамилия';
+    labelSurname.textContent = 'Фамилия';
     asterixSurname.textContent = '*';
-    lableName.textContent = 'Имя';
+    labelName.textContent = 'Имя';
     asterixName.textContent = '*';
-    lableLastname.textContent = 'Отчество';
+    labelLastname.textContent = 'Отчество';
 
     if (surname) {
-      lableSurname.classList.add('modal__lable_up');
+      labelSurname.classList.add('modal__label_up');
       inputSurname.value = surname;
     };
 
     if (name) {
-      lableName.classList.add('modal__lable_up');
+      labelName.classList.add('modal__label_up');
       inputName.value = name;
     };
 
     if (lastName) {
-      lableLastname.classList.add('modal__lable_up');
+      labelLastname.classList.add('modal__label_up');
       inputLastname.value = lastName;
     };
 
-    lableSurname.append(asterixSurname);
-    lableName.append(asterixName);
+    labelSurname.append(asterixSurname);
+    labelName.append(asterixName);
 
-    wrapperSurname.append(lableSurname);
+    wrapperSurname.append(labelSurname);
     wrapperSurname.append(inputSurname);
-    wrapperName.append(lableName);
+    wrapperName.append(labelName);
     wrapperName.append(inputName);
-    wrapperLastname.append(lableLastname);
+    wrapperLastname.append(labelLastname);
     wrapperLastname.append(inputLastname);
 
     wrapperClientName.append(wrapperSurname);
@@ -889,14 +889,14 @@
     });
 
 
-    // Подъем lables
-    showInpunsUnderLables(wrapperClientName);
+    // Подъем labels
+    showInpunsUnderlabels(wrapperClientName);
 
     return fieldsetClientName;
   }
 
   // Функция подъёма label если фокус на input
-  function showInpunsUnderLables(wrapperClientName) {
+  function showInpunsUnderlabels(wrapperClientName) {
     const inputs = wrapperClientName.querySelectorAll('.inputs__wrap');
     inputs.forEach(addListenersOnInput);
   };
@@ -904,13 +904,13 @@
   // Добавил обработчики событий на инпут 
   function addListenersOnInput(input) {
     const inputElement = input.querySelector('.modal__intup');
-    const lableElement = input.querySelector('.modal__lable');
+    const labelElement = input.querySelector('.modal__label');
     inputElement.addEventListener('focus', function () {
-      lableElement.classList.add('modal__lable_up');
+      labelElement.classList.add('modal__label_up');
     });
     inputElement.addEventListener('blur', function () {
       if (!inputElement.value) {
-        lableElement.classList.remove('modal__lable_up');
+        labelElement.classList.remove('modal__label_up');
       };
     });
   };

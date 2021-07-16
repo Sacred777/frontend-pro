@@ -601,7 +601,7 @@
   transition: opacity 0.3s ease;
 }
 
-.modal__lable {
+.modal__label {
   position: absolute;
   top: 16px;
   left: 0;
@@ -614,11 +614,11 @@
   transition-timing-function: ease-in-out;
 }
 
-.lable_asterix {
+.label_asterix {
   color: var(--light-slate-blue);
 }
 
-.modal__lable_up {
+.modal__label_up {
   top: 0;
   bottom: initial;
   margin-bottom: 2px;
